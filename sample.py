@@ -21,6 +21,7 @@ class YoutubeChannelVideoScraper(object):
         self.views = []
         self.channel_names = []
         self.channel_subscribers = []
+        self.create_ats = []
 
 
     def run(self):
@@ -55,11 +56,11 @@ class YoutubeChannelVideoScraper(object):
 
     def parse_video_title_and_url_and_view(self):
         soup = BeautifulSoup(self.current_html, 'html.parser')
-        # channel_name
+        # ChannelNameOfExtractionFunction
         channel_name_i = soup.find("yt-formatted-string", class_="style-scope ytd-channel-name")
         channel_name_lstrip = str(channel_name_i).lstrip('<yt-formatted-string class="style-scope ytd-channel-name" id="text" title="">')
         channel_name_rstrip = channel_name_lstrip.rstrip('</yt-formatted-string>')
-        # channel_subscriber
+        # ChannelSubscriberOfIntExtractionFunction
         channel_subscriber_i = soup.find("yt-formatted-string", class_="style-scope ytd-c4-tabbed-header-renderer")
         channel_subscriber_lstrip = str(channel_subscriber_i).lstrip('<yt-formatted-string class="style-scope ytd-c4-tabbed-header-renderer" id="subscriber-count">')
         channel_subscriber_rstrip = channel_subscriber_lstrip.rstrip('</yt-formatted-string>')
@@ -80,6 +81,8 @@ class YoutubeChannelVideoScraper(object):
             url = (i.get("href"))
             # view
             view_material_i = (i.get("aria-label"))
+            # create_at
+            create_at_material_i = (i.get("aria-label"))
             # NoneExclusion
             if title is None:
                 continue
@@ -87,6 +90,9 @@ class YoutubeChannelVideoScraper(object):
                 continue
             elif view_material_i is None:
                 continue
+            elif create_at_material_i is None:
+                continue
+            # ViewOfIntExtractionFunction
             view_material = view_material_i.replace('　', ' ')
             view_findall = (re.findall('前 .*回視聴', view_material))
             if view_findall:
@@ -97,15 +103,24 @@ class YoutubeChannelVideoScraper(object):
                 view_int = [int(s) for s in view_replace_x_x_x.split() if s.isdigit()]
                 view_last_int = (view_int[-1])
                 view = view_last_int
-            # self
-            channel_name = channel_name_rstrip
+            # ChannelInfomation
+            channel_name = str(channel_name_rstrip)
             channel_subscriber = channel_subscriber_material
+            # CreatAtOfIntExtractionFunction
+            create_at_material = (i.get("aria-label"))
+            create_at_findall = (re.findall('%s .*前' % channel_name, create_at_material))
+            create_at_str = ",".join(create_at_findall)
+            create_at_replace_x = create_at_str.replace(channel_name, '')
+            create_at_replace_x_x = create_at_replace_x.replace(' ', '')
+            create_at = create_at_replace_x_x
+            # self
             if "/watch?v=" in url:
                 self.titles.append(title)
                 self.video_urls.append(url)
                 self.views.append(view)
                 self.channel_names.append(channel_name)
                 self.channel_subscribers.append(channel_subscriber)
+                self.create_ats.append(create_at)
 
 
     def save_as_csv_file(self):
@@ -114,7 +129,8 @@ class YoutubeChannelVideoScraper(object):
          "url": self.video_urls,
          "view": self.views,
          "channel_name": self.channel_names,
-         "channel_subscriber": self.channel_subscribers
+         "channel_subscriber": self.channel_subscribers,
+         "create_at": self.create_ats
         }
         pd.DataFrame(data).to_csv(self.csv_file_path,index=False)
 
