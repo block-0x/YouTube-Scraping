@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import re
+# import run
 
 
 class YoutubeChannelVideoScraper(object):
@@ -13,7 +14,7 @@ class YoutubeChannelVideoScraper(object):
     def __init__(self):
         self.youtube_url = "https://www.youtube.com"
         self.user_name = "EGA-CHANNEL1"
-        self.csv_file_name = "sample"
+        self.csv_file_name = "./data/youtube_raw_data"
         self.csv_file_path = os.path.join(os.getcwd(), self.csv_file_name+'.csv')
         self.channel_videos_url = os.path.join(self.youtube_url, 'c', self.user_name, 'videos')
         self.titles = []
@@ -121,6 +122,7 @@ class YoutubeChannelVideoScraper(object):
                 self.channel_names.append(channel_name)
                 self.channel_subscribers.append(channel_subscriber)
                 self.create_ats.append(create_at)
+                # print(self.create_ats.append(create_at))
 
 
     def save_as_csv_file(self):
@@ -136,7 +138,7 @@ class YoutubeChannelVideoScraper(object):
         self.driver.close()
 
 
-if __name__ == "__main__":
-    scraper = YoutubeChannelVideoScraper()
-    scraper.run()
+# if __name__ == "__main__":
+#     scraper = YoutubeChannelVideoScraper()
+#     scraper.run()
     
