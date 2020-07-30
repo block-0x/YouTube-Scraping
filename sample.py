@@ -53,7 +53,7 @@ class YoutubeChannelVideoScraper(object):
 
     def parse_video_title_and_url_and_view(self):
         soup = BeautifulSoup(self.current_html, 'html.parser')
-        channel_name_i = soup.find("yt-formatted-string", class_="style-scope ytd-c4-tabbed-header-renderer")
+        channel_name_i = soup.find("yt-formatted-string", class_="style-scope ytd-channel-name")
         # print(channel_name)
         for i in soup.find_all("a"):
             title = (i.get("title"))
