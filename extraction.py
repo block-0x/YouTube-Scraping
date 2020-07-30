@@ -133,8 +133,10 @@ class YoutubeChannelVideoScraper(object):
          "create_at": self.create_ats
         }
         pd.DataFrame(data).to_csv(self.csv_file_path,index=False)
+        self.driver.close()
 
 
 if __name__ == "__main__":
     scraper = YoutubeChannelVideoScraper()
     scraper.run()
+    
