@@ -20,6 +20,7 @@ class YoutubeChannelVideoScraper(object):
         self.video_urls = []
         self.views = []
         self.channel_names = []
+        self.channel_subscribers = []
 
 
     def run(self):
@@ -54,12 +55,15 @@ class YoutubeChannelVideoScraper(object):
     def parse_video_title_and_url_and_view(self):
         soup = BeautifulSoup(self.current_html, 'html.parser')
         channel_name_i = soup.find("yt-formatted-string", class_="style-scope ytd-channel-name")
-        # print(channel_name)
+        print(channel_name)
+        channel_subscriber_i = soup.find("yt-formatted-string", class_="style-scope ytd-c4-tabbed-header-renderer")
+        print(channel_subscriber)
         for i in soup.find_all("a"):
             title = (i.get("title"))
             url = (i.get("href"))
             view_material_text = (i.get("aria-label"))
             channel_name = channel_name_i
+            channel_subscriber = channel_subscriber_i
             if title is None:
                 continue
             elif url is None:
@@ -80,13 +84,15 @@ class YoutubeChannelVideoScraper(object):
                 self.video_urls.append(url)
                 self.views.append(view)
                 self.channel_names.append(channel_name)
-
+                self.channel_subscribers.append(channel_subscriber)
+                
     def save_as_csv_file(self):
         data = {
          "title": self.titles,
          "url": self.video_urls,
          "view": self.views,
          "channel_name": self.channel_names
+         "channel_subscriber": self.channel_subscribers
         }
         pd.DataFrame(data).to_csv(self.csv_file_path,index=False)
 
