@@ -57,33 +57,18 @@ class YoutubeChannelVideoScraper(object):
         channel_name_i = soup.find("yt-formatted-string", class_="style-scope ytd-channel-name")
         channel_name_lstrip = str(channel_name_i).lstrip('<yt-formatted-string class="style-scope ytd-channel-name" id="text" title="">')
         channel_name_rstrip = channel_name_lstrip.rstrip('</yt-formatted-string>')
-        # print(channel_name_rstrip)
         channel_subscriber_i = soup.find("yt-formatted-string", class_="style-scope ytd-c4-tabbed-header-renderer")
-        # print(channel_subscriber_i)
-        # channel_subscriber_str = str(channel_subscriber_i)
-        # print(channel_subscriber_str)
-        # channel_subscriber_replace = channel_subscriber_str.replace('　', ' ')
-        # print(channel_subscriber_replace)
         channel_subscriber_lstrip = str(channel_subscriber_i).lstrip('<yt-formatted-string class="style-scope ytd-c4-tabbed-header-renderer" id="subscriber-count">')
-        # print(channel_subscriber_lstrip)
         channel_subscriber_rstrip = channel_subscriber_lstrip.rstrip('</yt-formatted-string>')
-        # print(channel_subscriber_rstrip)
         if "万" in channel_subscriber_rstrip:
-            print("万人以上")
             channel_subscriber_replace = channel_subscriber_rstrip.replace(' ', '')
-            print(channel_subscriber_replace)
             channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
-            print(channel_subscriber_sub)
             channel_subscriber_add_million = channel_subscriber_sub + '0000'
-            print(channel_subscriber_add_million)
             channel_subscriber_material = int(channel_subscriber_add_million)
         else:
-            print("万人以下")
             channel_subscriber_replace = channel_subscriber_rstrip.replace(' ', '')
-            # print(channel_subscriber_replace)
             channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
             channel_subscriber_material = int(channel_subscriber_sub)
-            # channel_subscriber_material = [int(s) for s in channel_subscriber_replace.split() if s.isdigit()]
         for i in soup.find_all("a"):
             title = (i.get("title"))
             url = (i.get("href"))
