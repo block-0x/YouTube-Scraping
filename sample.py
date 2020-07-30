@@ -12,18 +12,20 @@ class YoutubeChannelVideoScraper(object):
 
     def __init__(self, user_name, csv_file_name):
         self.youtube_url = "https://www.youtube.com"
-        self.user_name = "youtube_chanel_name"
+        self.user_name = "UCSPkmZyeHlDNE-6YMSg5Fbg"
         self.csv_file_name = "sample"
         self.csv_file_path = os.path.join(os.getcwd(), self.csv_file_name+'.csv')
-        self.channel_videos_url = os.path.join(self.youtube_url, 'user_or_c_or_chanel', self.user_name, 'videos')
+        self.channel_videos_url = os.path.join(self.youtube_url, 'channel', self.user_name, 'videos')
         self.titles = []
         self.video_urls = []
         self.views = []
 
+
     def run(self):
         self.get_page_source()
-        self.parse_video_title_and_url()
+        self.parse_video_title_and_url_and_view()
         self.save_as_csv_file()
+
 
     def get_page_source(self):
         self.driver = webdriver.Chrome()
@@ -47,7 +49,8 @@ class YoutubeChannelVideoScraper(object):
             else:
                 break
 
-    def parse_video_title_and_url(self):
+
+    def parse_video_title_and_url_and_view(self):
         soup = BeautifulSoup(self.current_html, 'html.parser')
         for i in soup.find_all("a"):
             title = (i.get("title"))
@@ -74,6 +77,7 @@ class YoutubeChannelVideoScraper(object):
                 self.video_urls.append(url)
                 self.views.append(view)
 
+
     def save_as_csv_file(self):
         data = {
          "title": self.titles,
@@ -84,5 +88,5 @@ class YoutubeChannelVideoScraper(object):
 
 
 if __name__ == "__main__":
-    scraper = YoutubeChannelVideoScraper(user_name="HikakinTV", csv_file_name="HikakinTV")
+    scraper = YoutubeChannelVideoScraper(user_name="UCSPkmZyeHlDNE-6YMSg5Fbg", csv_file_name="UCSPkmZyeHlDNE-6YMSg5Fbg")
     scraper.run()
