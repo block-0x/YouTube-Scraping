@@ -12,10 +12,10 @@ class YoutubeChannelVideoScraper(object):
 
     def __init__(self, user_name, csv_file_name):
         self.youtube_url = "https://www.youtube.com"
-        self.user_name = "UCjtdHozx061-WlYUJiWZlww"
+        self.user_name = "EGA-CHANNEL1"
         self.csv_file_name = "sample"
         self.csv_file_path = os.path.join(os.getcwd(), self.csv_file_name+'.csv')
-        self.channel_videos_url = os.path.join(self.youtube_url, 'channel', self.user_name, 'videos')
+        self.channel_videos_url = os.path.join(self.youtube_url, 'c', self.user_name, 'videos')
         self.titles = []
         self.video_urls = []
         self.views = []
@@ -44,7 +44,7 @@ class YoutubeChannelVideoScraper(object):
             for j in range(100):
                 actions.send_keys(Keys.PAGE_DOWN)
             actions.perform()
-            sleep(3)
+            sleep(2.5)
             html = self.driver.page_source
             if self.current_html != html:
                 self.current_html=html
@@ -57,15 +57,39 @@ class YoutubeChannelVideoScraper(object):
         channel_name_i = soup.find("yt-formatted-string", class_="style-scope ytd-channel-name")
         channel_name_lstrip = str(channel_name_i).lstrip('<yt-formatted-string class="style-scope ytd-channel-name" id="text" title="">')
         channel_name_rstrip = channel_name_lstrip.rstrip('</yt-formatted-string>')
-        print(channel_name_rstrip)
+        # print(channel_name_rstrip)
         channel_subscriber_i = soup.find("yt-formatted-string", class_="style-scope ytd-c4-tabbed-header-renderer")
-        print(channel_subscriber_i)
+        # print(channel_subscriber_i)
+        # channel_subscriber_str = str(channel_subscriber_i)
+        # print(channel_subscriber_str)
+        # channel_subscriber_replace = channel_subscriber_str.replace('　', ' ')
+        # print(channel_subscriber_replace)
+        channel_subscriber_lstrip = str(channel_subscriber_i).lstrip('<yt-formatted-string class="style-scope ytd-c4-tabbed-header-renderer" id="subscriber-count">')
+        # print(channel_subscriber_lstrip)
+        channel_subscriber_rstrip = channel_subscriber_lstrip.rstrip('</yt-formatted-string>')
+        # print(channel_subscriber_rstrip)
+        if "万" in channel_subscriber_rstrip:
+            print("万人以上")
+            channel_subscriber_replace = channel_subscriber_rstrip.replace(' ', '')
+            print(channel_subscriber_replace)
+            channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
+            print(channel_subscriber_sub)
+            channel_subscriber_add_million = channel_subscriber_sub + '0000'
+            print(channel_subscriber_add_million)
+            channel_subscriber_material = int(channel_subscriber_add_million)
+        else:
+            print("万人以下")
+            channel_subscriber_replace = channel_subscriber_rstrip.replace(' ', '')
+            # print(channel_subscriber_replace)
+            channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
+            channel_subscriber_material = int(channel_subscriber_sub)
+            # channel_subscriber_material = [int(s) for s in channel_subscriber_replace.split() if s.isdigit()]
         for i in soup.find_all("a"):
             title = (i.get("title"))
             url = (i.get("href"))
             view_material_text = (i.get("aria-label"))
             channel_name = channel_name_rstrip
-            channel_subscriber = channel_subscriber_i
+            channel_subscriber = channel_subscriber_material
             if title is None:
                 continue
             elif url is None:
@@ -100,5 +124,5 @@ class YoutubeChannelVideoScraper(object):
 
 
 if __name__ == "__main__":
-    scraper = YoutubeChannelVideoScraper(user_name="UCjtdHozx061-WlYUJiWZlww", csv_file_name="UCjtdHozx061-WlYUJiWZlww")
+    scraper = YoutubeChannelVideoScraper(user_name="EGA-CHANNEL1", csv_file_name="EGA-CHANNEL1")
     scraper.run()
