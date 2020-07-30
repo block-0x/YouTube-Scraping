@@ -26,6 +26,7 @@ class YoutubeChannelVideoScraper(object):
     def run(self):
         self.get_page_source()
         self.parse_video_title_and_url_and_view()
+        # self.parse_channel_name_and_subscriber()
         self.save_as_csv_file()
 
 
@@ -44,7 +45,7 @@ class YoutubeChannelVideoScraper(object):
             for j in range(100):
                 actions.send_keys(Keys.PAGE_DOWN)
             actions.perform()
-            sleep(2.5)
+            sleep(2)
             html = self.driver.page_source
             if self.current_html != html:
                 self.current_html=html
@@ -54,9 +55,11 @@ class YoutubeChannelVideoScraper(object):
 
     def parse_video_title_and_url_and_view(self):
         soup = BeautifulSoup(self.current_html, 'html.parser')
+        # channel_name
         channel_name_i = soup.find("yt-formatted-string", class_="style-scope ytd-channel-name")
         channel_name_lstrip = str(channel_name_i).lstrip('<yt-formatted-string class="style-scope ytd-channel-name" id="text" title="">')
         channel_name_rstrip = channel_name_lstrip.rstrip('</yt-formatted-string>')
+        # channel_subscriber
         channel_subscriber_i = soup.find("yt-formatted-string", class_="style-scope ytd-c4-tabbed-header-renderer")
         channel_subscriber_lstrip = str(channel_subscriber_i).lstrip('<yt-formatted-string class="style-scope ytd-c4-tabbed-header-renderer" id="subscriber-count">')
         channel_subscriber_rstrip = channel_subscriber_lstrip.rstrip('</yt-formatted-string>')
@@ -70,26 +73,33 @@ class YoutubeChannelVideoScraper(object):
             channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
             channel_subscriber_material = int(channel_subscriber_sub)
         for i in soup.find_all("a"):
+            # print(i)
+            # title
             title = (i.get("title"))
+            # url
             url = (i.get("href"))
-            view_material_text = (i.get("aria-label"))
-            channel_name = channel_name_rstrip
-            channel_subscriber = channel_subscriber_material
+            # view
+            view_material_i = (i.get("aria-label"))
+            # NoneExclusion
             if title is None:
                 continue
             elif url is None:
                 continue
-            elif view_material_text is None:
+            elif view_material_i is None:
                 continue
-            view_material = view_material_text.replace('　', ' ')
-            view_text = (re.findall('前 .*回視聴', view_material))
-            if view_text:
-                string = ",".join(view_text)
-                string_new = string.replace('前 ', '')
-                view_text_x = string_new.replace(' 回視聴', '')
-                view_text_y = view_text_x.replace(',', '')
-                str_list_new_x = [int(s) for s in view_text_y.split() if s.isdigit()]
-                view = (str_list_new_x[-1])
+            view_material = view_material_i.replace('　', ' ')
+            view_findall = (re.findall('前 .*回視聴', view_material))
+            if view_findall:
+                view_str = ",".join(view_findall)
+                view_replace_x = view_str.replace('前 ', '')
+                view_replace_x_x = view_replace_x.replace(' 回視聴', '')
+                view_replace_x_x_x = view_replace_x_x.replace(',', '')
+                view_int = [int(s) for s in view_replace_x_x_x.split() if s.isdigit()]
+                view_last_int = (view_int[-1])
+                view = view_last_int
+            # self
+            channel_name = channel_name_rstrip
+            channel_subscriber = channel_subscriber_material
             if "/watch?v=" in url:
                 self.titles.append(title)
                 self.video_urls.append(url)
