@@ -10,7 +10,7 @@ import re
 
 class YoutubeChannelVideoScraper(object):
 
-    def __init__(self, user_name, csv_file_name):
+    def __init__(self):
         self.youtube_url = "https://www.youtube.com"
         self.user_name = "EGA-CHANNEL1"
         self.csv_file_name = "sample"
@@ -96,7 +96,8 @@ class YoutubeChannelVideoScraper(object):
                 self.views.append(view)
                 self.channel_names.append(channel_name)
                 self.channel_subscribers.append(channel_subscriber)
-                
+
+
     def save_as_csv_file(self):
         data = {
          "title": self.titles,
@@ -109,5 +110,5 @@ class YoutubeChannelVideoScraper(object):
 
 
 if __name__ == "__main__":
-    scraper = YoutubeChannelVideoScraper(user_name="EGA-CHANNEL1", csv_file_name="EGA-CHANNEL1")
+    scraper = YoutubeChannelVideoScraper()
     scraper.run()
