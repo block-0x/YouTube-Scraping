@@ -12,13 +12,14 @@ class YoutubeChannelVideoScraper(object):
 
     def __init__(self, user_name, csv_file_name):
         self.youtube_url = "https://www.youtube.com"
-        self.user_name = "UCSPkmZyeHlDNE-6YMSg5Fbg"
+        self.user_name = "UCjtdHozx061-WlYUJiWZlww"
         self.csv_file_name = "sample"
         self.csv_file_path = os.path.join(os.getcwd(), self.csv_file_name+'.csv')
         self.channel_videos_url = os.path.join(self.youtube_url, 'channel', self.user_name, 'videos')
         self.titles = []
         self.video_urls = []
         self.views = []
+        self.channel_names = []
 
 
     def run(self):
@@ -52,10 +53,13 @@ class YoutubeChannelVideoScraper(object):
 
     def parse_video_title_and_url_and_view(self):
         soup = BeautifulSoup(self.current_html, 'html.parser')
+        channel_name_i = soup.find("yt-formatted-string", class_="style-scope ytd-c4-tabbed-header-renderer")
+        # print(channel_name)
         for i in soup.find_all("a"):
             title = (i.get("title"))
             url = (i.get("href"))
             view_material_text = (i.get("aria-label"))
+            channel_name = channel_name_i
             if title is None:
                 continue
             elif url is None:
@@ -71,22 +75,22 @@ class YoutubeChannelVideoScraper(object):
                 view_text_y = view_text_x.replace(',', '')
                 str_list_new_x = [int(s) for s in view_text_y.split() if s.isdigit()]
                 view = (str_list_new_x[-1])
-                print(view)
             if "/watch?v=" in url:
                 self.titles.append(title)
                 self.video_urls.append(url)
                 self.views.append(view)
-
+                self.channel_names.append(channel_name)
 
     def save_as_csv_file(self):
         data = {
          "title": self.titles,
          "url": self.video_urls,
-         "view": self.views
+         "view": self.views,
+         "channel_name": self.channel_names
         }
         pd.DataFrame(data).to_csv(self.csv_file_path,index=False)
 
 
 if __name__ == "__main__":
-    scraper = YoutubeChannelVideoScraper(user_name="UCSPkmZyeHlDNE-6YMSg5Fbg", csv_file_name="UCSPkmZyeHlDNE-6YMSg5Fbg")
+    scraper = YoutubeChannelVideoScraper(user_name="UCjtdHozx061-WlYUJiWZlww", csv_file_name="UCjtdHozx061-WlYUJiWZlww")
     scraper.run()
