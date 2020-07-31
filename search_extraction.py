@@ -63,8 +63,6 @@ class YouTubeSearchScraper(object):
 
     def parse_video_title_and_url_and_view(self):
         soup = BeautifulSoup(self.current_html, 'html.parser')
-        # channel_name = soup.find_all("a", class_="yt-simple-endpoint style-scope yt-formatted-string")
-        # print(channel_name)
         for i in soup.find_all("div", id = "dismissable"):
             # print(i)
             # TitleOfIntExtractionFunction
@@ -74,31 +72,37 @@ class YouTubeSearchScraper(object):
             # UrlOfIntExtractionFunction
             url_i = re.findall('class="yt-simple-endpoint style-scope ytd-video-renderer".* id="video-title"', str(i))
             url_i_str = ",".join(url_i)
-            url = url_i_str.replace('class="yt-simple-endpoint style-scope ytd-video-renderer" href=', '').replace(' id="video-title"', '')
-            # material
-            url = (i.get("aria-label"))
-            material = (i.get("aria-label"))
+            url = url_i_str.replace('class="yt-simple-endpoint style-scope ytd-video-renderer" href=', '').replace(' id="video-title"', '').strip('""')
+            # ViewOfIntExtractionFunction
+            view_i = re.findall('<yt-formatted-string aria-label=".* 回視聴" class="style-scope ytd-video-renderer">', str(i))
+            view_i_str = ",".join(view_i)
+            view_i_str_replace = view_i_str.replace('<yt-formatted-string aria-label="', '').replace('前 ', '').replace(' 回視聴" class="style-scope ytd-video-renderer">', '').replace(',', '')
+            view_i_str_replace_int = [int(s) for s in view_i_str_replace.split() if s.isdigit()]
+            view = (view_i_str_replace_int[-1])
             # create_at
+            material = re.findall('id="video-title" title=".*">', str(i))
             # create_at_material_i = (i.get("aria-label"))
             # NoneExclusion
             if title is None:
                 continue
             elif url is None:
                 continue
+            elif view is None:
+                continue
             elif material is None:
                 continue
             # MaterialOfIntExtractionFunction
-            material = material.replace('　', '')
+            # material = material.replace('　', '')
             # print(channel_name_material_x)
             # viewOfIntExtractionFunction
-            view_material = material
-            view_findall = (re.findall('前 .*回視聴', view_material))
-            if view_findall:
-                view_str = ",".join(view_findall)
-                view_replace = view_str.replace('前 ', '').replace(' 回視聴', '').replace(',', '')
-                view_int = [int(s) for s in view_replace.split() if s.isdigit()]
-                view_last_int = (view_int[-1])
-                view = view_last_int
+            # view_material = material
+            # view_findall = (re.findall('.*回視聴', view_material))
+            # if view_findall:
+            #     view_str = ",".join(view_findall)
+            #     view_replace = view_str.replace('前 ', '').replace(' 回視聴', '').replace(',', '')
+            #     view_int = [int(s) for s in view_replace.split() if s.isdigit()]
+            #     view_last_int = (view_int[-1])
+            #     view = view_last_int
             # channel_name_material
             # channel_name_ = i
             # channel_name_material = re.findall('<a class="yt-simple-endpoint style-scope yt-formatted-string".*</a>', str(i))
