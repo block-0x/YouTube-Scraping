@@ -22,6 +22,7 @@ class YouTubeSearchScraper(object):
         self.titles = []
         self.video_urls = []
         self.views = []
+        self.channel_urls = []
         self.channel_names = []
         # self.channel_subscribers = []
         # self.create_ats = []
@@ -29,7 +30,7 @@ class YouTubeSearchScraper(object):
 
     def run(self):
         self.get_page_source()
-        self.parse_video_title_and_url_and_view()
+        self.parse_youtube_search_information()
         self.save_as_csv_file()
 
 
@@ -55,13 +56,13 @@ class YouTubeSearchScraper(object):
                 t = 0
                 start = time.time()
                 t = time.time() - start
-                t == 20
+                t == 10
                 break
             # else:
             #     break
 
 
-    def parse_video_title_and_url_and_view(self):
+    def parse_youtube_search_information(self):
         soup = BeautifulSoup(self.current_html, 'html.parser')
         for i in soup.find_all("div", id = "dismissable"):
             # print(i)
@@ -70,24 +71,35 @@ class YouTubeSearchScraper(object):
             title_i_str = ",".join(title_i)
             title = title_i_str.replace('id="video-title" title="', '').replace('">', '').replace('&amp;', '&')
             # UrlOfIntExtractionFunction
-            url_i = re.findall('class="yt-simple-endpoint style-scope ytd-video-renderer".* id="video-title"', str(i))
-            url_i_str = ",".join(url_i)
-            url = url_i_str.replace('class="yt-simple-endpoint style-scope ytd-video-renderer" href=', '').replace(' id="video-title"', '').strip('""')
+            video_url_i = re.findall('class="yt-simple-endpoint style-scope ytd-video-renderer".* id="video-title"', str(i))
+            video_url_i_str = ",".join(video_url_i)
+            video_url = video_url_i_str.replace('class="yt-simple-endpoint style-scope ytd-video-renderer" href=', '').replace(' id="video-title"', '').strip('""')
             # ViewOfIntExtractionFunction
             view_i = re.findall('<yt-formatted-string aria-label=".* 回視聴" class="style-scope ytd-video-renderer">', str(i))
             view_i_str = ",".join(view_i)
             view_i_str_replace = view_i_str.replace('<yt-formatted-string aria-label="', '').replace('前 ', '').replace(' 回視聴" class="style-scope ytd-video-renderer">', '').replace(',', '')
             view_i_str_replace_int = [int(s) for s in view_i_str_replace.split() if s.isdigit()]
             view = (view_i_str_replace_int[-1])
-            # create_at
+            # ChannelUrlNameInfomation
+            channel_url_i = re.findall('<a aria-label="チャンネルに移動" class="style-scope ytd-video-renderer" href=".*">', str(i))
+            channel_url_i_str = ",".join(channel_url_i)
+            channel_url = channel_url_i_str.replace('<a aria-label="チャンネルに移動" class="style-scope ytd-video-renderer" href="', '').replace('">', '').strip('""')
+            # ChannelNameInfomation
+            channel_name_i = re.findall('<yt-formatted-string class="style-scope ytd-channel-name" has-link-only_="" id="text" title=""><a class="yt-simple-endpoint style-scope yt-formatted-string" dir="auto" href=".*</a></yt-formatted-string>', str(i))
+            channel_name_i_str = ",".join(channel_name_i)
+            channel_name = channel_name_i_str.replace('<yt-formatted-string class="style-scope ytd-channel-name" has-link-only_="" id="text" title=""><a class="yt-simple-endpoint style-scope yt-formatted-string" dir="auto" href="', '').replace('</a></yt-formatted-string>', '').replace('%s' % channel_url, '').replace('" spellcheck="false">', '')
             material = re.findall('id="video-title" title=".*">', str(i))
             # create_at_material_i = (i.get("aria-label"))
             # NoneExclusion
             if title is None:
                 continue
-            elif url is None:
+            elif video_url is None:
                 continue
             elif view is None:
+                continue
+            elif channel_url is None:
+                continue
+            elif channel_name is None:
                 continue
             elif material is None:
                 continue
@@ -119,7 +131,7 @@ class YouTubeSearchScraper(object):
                 # channel_name_int = [int(s) for s in channel_name_replace.split() if s.isdigit()]
                 # channel_name_last_int = (channel_name_int[-1])
                 # print(channel_name_last_int)
-            channel_name = "channel_name_last_int"
+            # channel_name = "channel_name_last_int"
             # channel_subscriber = channel_subscriber_material
             # CreatAtOfIntExtractionFunction
             # create_at_material = (i.get("aria-label"))
@@ -129,10 +141,11 @@ class YouTubeSearchScraper(object):
             # create_at_replace_x_x = create_at_replace_x.replace(' ', '')
             # create_at = create_at_replace_x_x
             # self
-            if "/watch?v=" in url:
+            if "/watch?v=" in video_url:
                 self.titles.append(title)
-                self.video_urls.append(url)
+                self.video_urls.append(video_url)
                 self.views.append(view)
+                self.channel_urls.append(channel_url)
                 self.channel_names.append(channel_name)
                 # self.channel_subscribers.append(channel_subscriber)
                 # self.create_ats.append(create_at)
@@ -142,8 +155,9 @@ class YouTubeSearchScraper(object):
     def save_as_csv_file(self):
         data = {
          "title": self.titles,
-         "url": self.video_urls,
+         "video_url": self.video_urls,
          "view": self.views,
+         "channel_url": self.channel_urls,
          "channel_name": self.channel_names,
          # "channel_subscriber": self.channel_subscribers,
          # "create_at": self.create_ats
