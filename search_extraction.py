@@ -22,7 +22,7 @@ class YouTubeSearchScraper(object):
         self.titles = []
         self.video_urls = []
         self.views = []
-        # self.channel_names = []
+        self.channel_names = []
         # self.channel_subscribers = []
         # self.create_ats = []
 
@@ -63,14 +63,21 @@ class YouTubeSearchScraper(object):
 
     def parse_video_title_and_url_and_view(self):
         soup = BeautifulSoup(self.current_html, 'html.parser')
-        for i in soup.find_all("a"):
+        # channel_name = soup.find_all("a", class_="yt-simple-endpoint style-scope yt-formatted-string")
+        # print(channel_name)
+        for i in soup.find_all("div", id = "dismissable"):
             # print(i)
-            # title
-            title = (i.get("title"))
-            # url
-            url = (i.get("href"))
+            # TitleOfIntExtractionFunction
+            title_i = re.findall('id="video-title" title=".*">', str(i))
+            title_i_str = ",".join(title_i)
+            title = title_i_str.replace('id="video-title" title="', '').replace('">', '').replace('&amp;', '&')
+            # UrlOfIntExtractionFunction
+            url_i = re.findall('class="yt-simple-endpoint style-scope ytd-video-renderer".* id="video-title"', str(i))
+            url_i_str = ",".join(url_i)
+            url = url_i_str.replace('class="yt-simple-endpoint style-scope ytd-video-renderer" href=', '').replace(' id="video-title"', '')
             # material
-            material_i = (i.get("aria-label"))
+            url = (i.get("aria-label"))
+            material = (i.get("aria-label"))
             # create_at
             # create_at_material_i = (i.get("aria-label"))
             # NoneExclusion
@@ -78,10 +85,11 @@ class YouTubeSearchScraper(object):
                 continue
             elif url is None:
                 continue
-            elif material_i is None:
+            elif material is None:
                 continue
             # MaterialOfIntExtractionFunction
-            material = material_i.replace('　', '')
+            material = material.replace('　', '')
+            # print(channel_name_material_x)
             # viewOfIntExtractionFunction
             view_material = material
             view_findall = (re.findall('前 .*回視聴', view_material))
@@ -91,19 +99,23 @@ class YouTubeSearchScraper(object):
                 view_int = [int(s) for s in view_replace.split() if s.isdigit()]
                 view_last_int = (view_int[-1])
                 view = view_last_int
+            # channel_name_material
+            # channel_name_ = i
+            # channel_name_material = re.findall('<a class="yt-simple-endpoint style-scope yt-formatted-string".*</a>', str(i))
+            # print(str(i))
+            # channel_name_
             # ChannelNameInfomation
             # material = material_i.replace('　', '')
             # channel_name_material = material
             # channel_name_findall = (re.findall('作成者: .*前 ', channel_name_material))
-            # print(channel_name_findall)
             # if channel_name_findall:
             #     channel_name_str = ",".join(channel_name_findall)
-            #     channel_name_replace = channel_name_str.replace('前 ', '').replace(' 回視聴', '').replace(',', '')
-            #     channel_name_int = [int(s) for s in channel_name_replace.split() if s.isdigit()]
-            #     channel_name_last_int = (channel_name_int[-1])
-            #     print(channel_name_last_int)
-            #     channel_name = channel_name_last_int
-            # channel_name = str(channel_name_rstrip)
+            #     channel_name_replace = channel_name_str.replace('作成者:', '').replace(' ', '').replace(',', '')
+                # print(channel_name_replace)
+                # channel_name_int = [int(s) for s in channel_name_replace.split() if s.isdigit()]
+                # channel_name_last_int = (channel_name_int[-1])
+                # print(channel_name_last_int)
+            channel_name = "channel_name_last_int"
             # channel_subscriber = channel_subscriber_material
             # CreatAtOfIntExtractionFunction
             # create_at_material = (i.get("aria-label"))
@@ -112,12 +124,12 @@ class YouTubeSearchScraper(object):
             # create_at_replace_x = create_at_str.replace(channel_name, '')
             # create_at_replace_x_x = create_at_replace_x.replace(' ', '')
             # create_at = create_at_replace_x_x
-            self
+            # self
             if "/watch?v=" in url:
                 self.titles.append(title)
                 self.video_urls.append(url)
                 self.views.append(view)
-                # self.channel_names.append(channel_name)
+                self.channel_names.append(channel_name)
                 # self.channel_subscribers.append(channel_subscriber)
                 # self.create_ats.append(create_at)
                 # print(self.create_ats.append(create_at))
@@ -128,7 +140,7 @@ class YouTubeSearchScraper(object):
          "title": self.titles,
          "url": self.video_urls,
          "view": self.views,
-         # "channel_name": self.channel_names,
+         "channel_name": self.channel_names,
          # "channel_subscriber": self.channel_subscribers,
          # "create_at": self.create_ats
         }
