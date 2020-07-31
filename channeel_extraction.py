@@ -14,7 +14,7 @@ class YoutubeChannelVideoScraper(object):
     def __init__(self):
         self.youtube_url = "https://www.youtube.com"
         self.user_name = "EGA-CHANNEL1"
-        self.csv_file_name = "./data/youtube_raw_data"
+        self.csv_file_name = "./data/youtube_channel_raw_data"
         self.csv_file_path = os.path.join(os.getcwd(), self.csv_file_name+'.csv')
         self.channel_videos_url = os.path.join(self.youtube_url, 'c', self.user_name, 'videos')
         self.titles = []
