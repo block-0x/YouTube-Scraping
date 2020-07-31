@@ -13,9 +13,10 @@ import time
 class YouTubeSearchScraper(object):
 
     def __init__(self):
+        self.search_query = "asmr mukbang"
+        self.search_time = 10
         self.youtube_url = "https://www.youtube.com/"
         self.search_url = "results?search_query="
-        self.search_query = "asmr mukbang"
         self.csv_file_name = "./data/youtube_search_raw_data"
         self.csv_file_path = os.path.join(os.getcwd(), self.csv_file_name+'.csv')
         self.search_video_url = os.path.join(self.youtube_url, self.search_url, self.search_query)
@@ -25,6 +26,7 @@ class YouTubeSearchScraper(object):
         self.channel_urls = []
         self.channel_names = []
         self.video_times = []
+        self.create_stamps = []
 
 
     def run(self):
@@ -55,10 +57,9 @@ class YouTubeSearchScraper(object):
                 t = 0
                 start = time.time()
                 t = time.time() - start
-                t == 10
+                t == (self.search_time)
+                self.driver.close()
                 break
-            # else:
-            #     break
 
 
     def parse_youtube_search_information(self):
@@ -98,12 +99,18 @@ class YouTubeSearchScraper(object):
             channel_name = channel_name_i_str.replace('<yt-formatted-string class="style-scope ytd-channel-name" has-link-only_="" id="text" title=""><a class="yt-simple-endpoint style-scope yt-formatted-string" dir="auto" href="', '').replace('</a></yt-formatted-string>', '').replace('%s' % channel_url, '').replace('" spellcheck="false">', '')
             material = re.findall('id="video-title" title=".*">', str(i))
             '''
-            CreateAtOfIntExtractionFunction
+            VideoTimeOfIntExtractionFunction
             '''
             video_time_i = re.findall('</yt-icon><span aria-label=".* class="style-scope ytd-thumbnail-overlay-time-status-renderer"', str(i))
             video_time_i_str = ",".join(video_time_i)
             video_time = video_time_i_str.replace('</yt-icon><span aria-label="', '').replace('" class="style-scope ytd-thumbnail-overlay-time-status-renderer"', '')
             material = re.findall('id="video-title" title=".*">', str(i))
+            '''
+            CreateAtOfIntExtractionFunction
+            '''
+            create_stamp_i = re.findall('<span class="style-scope ytd-video-meta-block">.*前</span>', str(i))
+            create_stamp_i_str = ",".join(create_stamp_i)
+            create_stamp = create_stamp_i_str.replace('<span class="style-scope ytd-video-meta-block">', '').replace('前</span>', '')
             '''
             NoneExclusion
             '''
@@ -119,6 +126,8 @@ class YouTubeSearchScraper(object):
                 continue
             elif video_time is None:
                 continue
+            elif video_time is None:
+                continue
             if "/watch?v=" in video_url:
                 self.titles.append(title)
                 self.video_urls.append(video_url)
@@ -126,6 +135,7 @@ class YouTubeSearchScraper(object):
                 self.channel_urls.append(channel_url)
                 self.channel_names.append(channel_name)
                 self.video_times.append(video_time)
+                self.create_stamps.append(create_stamp)
 
 
     def save_as_csv_file(self):
@@ -135,10 +145,10 @@ class YouTubeSearchScraper(object):
          "view": self.views,
          "channel_url": self.channel_urls,
          "channel_name": self.channel_names,
-         "video_time": self.video_times
+         "video_time": self.video_times,
+         "create_stamp": self.create_stamps
         }
         pd.DataFrame(data).to_csv(self.csv_file_path,index=False)
-        self.driver.close()
 
 
 if __name__ == "__main__":
