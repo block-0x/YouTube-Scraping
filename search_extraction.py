@@ -13,12 +13,23 @@ import time
 class YouTubeSearchScraper(object):
 
     def __init__(self):
+        '''
+        youtube_url
+        '''
         self.search_query = "検索ワード"
         self.youtube_url = "https://www.youtube.com/"
         self.search_url = "results?search_query="
-        self.csv_file_name = "./data/youtube_search_raw_data"
-        self.csv_file_path = os.path.join(os.getcwd(), self.csv_file_name+'.csv')
+        '''
+        csv_file_path
+        '''
+        self.search_data_csv_file_name = "./data/youtube_search_raw_data"
+        self.channel_list_csv_file_name = "./data/youtube_channel_list"
+        self.csv_file_path = os.path.join(os.getcwd(), self.search_data_csv_file_name+'.csv')
+        self.csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
         self.search_video_url = os.path.join(self.youtube_url, self.search_url, self.search_query)
+        '''
+        extraction_data
+        '''
         self.titles = []
         self.video_urls = []
         self.views = []
@@ -31,7 +42,8 @@ class YouTubeSearchScraper(object):
     def run(self):
         self.get_page_source()
         self.parse_youtube_search_information()
-        self.save_as_csv_file()
+        self.search_data_save_as_csv_file()
+        self.channel_list_save_as_csv_file()
 
 
     def get_page_source(self):
@@ -136,7 +148,7 @@ class YouTubeSearchScraper(object):
                 self.create_stamps.append(create_stamp)
 
 
-    def save_as_csv_file(self):
+    def search_data_save_as_csv_file(self):
         data = {
          "title": self.titles,
          "video_url": self.video_urls,
@@ -145,6 +157,15 @@ class YouTubeSearchScraper(object):
          "channel_name": self.channel_names,
          "video_time": self.video_times,
          "create_stamp": self.create_stamps
+        }
+        pd.DataFrame(data).to_csv(self.csv_file_path,index=False)
+        self.driver.close()
+
+
+    def channel_list_save_as_csv_file(self):
+        data = {
+         "channel_url": self.channel_urls,
+         "channel_name": self.channel_names,
         }
         pd.DataFrame(data).to_csv(self.csv_file_path,index=False)
         self.driver.close()
