@@ -1,0 +1,12 @@
+<td class="style-scope ytd-channel-about-metadata-renderer">
+<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer"><span class="style-scope yt-formatted-string" dir="auto">メールアドレスを表示するには</span><a class="yt-simple-endpoint style-scope yt-formatted-string" dir="auto" href="https://accounts.google.com/ServiceLogin?service=youtube&amp;uilel=3&amp;passive=true&amp;continue=https%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26app%3Ddesktop%26hl%3Dja%26next%3D%252Fc%252FEGA-CHANNEL1%252Fabout&amp;hl=ja" rel="nofollow" spellcheck="false">ログイン</a><span class="style-scope yt-formatted-string" dir="auto">してください</span></yt-formatted-string>
+</td>
+<td class="style-scope ytd-channel-about-metadata-renderer" hidden="">
+<ytd-button-renderer align-by-text="" button-renderer="" class="style-scope ytd-channel-about-metadata-renderer" use-keyboard-focused=""></ytd-button-renderer>
+<div class="style-scope ytd-channel-about-metadata-renderer" id="captcha-container"></div>
+<div class="style-scope ytd-channel-about-metadata-renderer" id="email-container"></div>
+<a class="style-scope ytd-channel-about-metadata-renderer" hidden="" href="mailto:undefined" id="email" target="_blank"></a>
+</td>
+<td class="style-scope ytd-channel-about-metadata-renderer">
+<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">日本</yt-formatted-string>
+</td>
