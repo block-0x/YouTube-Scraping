@@ -9,10 +9,15 @@ class Function(object):
 
 
 	def mean_view(self):
-		df = pd.read_csv('./data/youtube_raw_data.csv',index_col='view')
+		df = pd.read_csv('./data/youtube_channel_raw_data.csv',index_col='view')
 		views = df.index.values
 		np.mean(df, axis=1)
 		s = sum(views)
 		N = len(views)
 		mean = s / N
 		print('平均:{0:.2f}'.format(mean))
+
+
+if __name__ == "__main__":
+    mean_view = Function()
+    mean_view.run()
