@@ -13,8 +13,7 @@ import time
 class YouTubeSearchScraper(object):
 
     def __init__(self):
-        self.search_query = "asmr mukbang"
-        self.search_time = 10
+        self.search_query = "検索ワード"
         self.youtube_url = "https://www.youtube.com/"
         self.search_url = "results?search_query="
         self.csv_file_name = "./data/youtube_search_raw_data"
@@ -50,15 +49,11 @@ class YouTubeSearchScraper(object):
             for j in range(100):
                 actions.send_keys(Keys.PAGE_DOWN)
             actions.perform()
-            sleep(2)
+            sleep(2.5)
             html = self.driver.page_source
             if self.current_html != html:
                 self.current_html=html
-                t = 0
-                start = time.time()
-                t = time.time() - start
-                t == (self.search_time)
-                self.driver.close()
+            else:
                 break
 
 
@@ -84,7 +79,10 @@ class YouTubeSearchScraper(object):
             view_i_str = ",".join(view_i)
             view_i_str_replace = view_i_str.replace('<yt-formatted-string aria-label="', '').replace('前 ', '').replace(' 回視聴" class="style-scope ytd-video-renderer">', '').replace(',', '')
             view_i_str_replace_int = [int(s) for s in view_i_str_replace.split() if s.isdigit()]
-            view = (view_i_str_replace_int[-1])
+            if view_i_str_replace_int:
+                view = (view_i_str_replace_int[-1])
+            else:
+                continue
             '''
             ChannelUrlNameOfIntExtractionFunction
             '''
@@ -149,6 +147,7 @@ class YouTubeSearchScraper(object):
          "create_stamp": self.create_stamps
         }
         pd.DataFrame(data).to_csv(self.csv_file_path,index=False)
+        self.driver.close()
 
 
 if __name__ == "__main__":
