@@ -9,13 +9,13 @@ class Function(object):
 
 
 	def mean_view(self):
-		df = pd.read_csv('./data/youtube_channel_raw_data.csv',index_col='view')
-		views = df.index.values
-		np.mean(df, axis=1)
-		s = sum(views)
-		N = len(views)
-		mean = s / N
-		print('平均:{0:.2f}'.format(mean))
+		channel_view_data = pd.read_csv('./data/youtube_channel_raw_data.csv',index_col='view')
+		views = channel_view_data.index.values
+		np.mean(channel_view_data, axis=1)
+		view_sum = sum(views)
+		view_number = len(views)
+		view_mean = view_sum / view_number
+		print(round(view_mean))
 
 
 if __name__ == "__main__":
