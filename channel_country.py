@@ -61,13 +61,18 @@ class ChannelCountryScraper(object):
     def parse_channel_country(self):
         soup = BeautifulSoup(self.current_html, 'html.parser')
         for i in soup.find_all("td", class_="style-scope ytd-channel-about-metadata-renderer"):
-            print(i)
+            # cuntry_i_replace = str(i).replace('\n','')
+            cuntry_i_findall = re.findall('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">.*</yt-formatted-string>', str(i))
+            cuntry_i_str = ",".join(cuntry_i_findall)
+            cuntry = str(cuntry_i_str).replace('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">', '').replace('</yt-formatted-string>', '').strip()
             '''
             NoneExclusion
             '''
-            # if title is None:
-            #     continue
-            country = "e"
+            if "<" in cuntry:
+                cuntry = None
+            if cuntry is None:
+                continue
+            print(cuntry)
             # self.country
 
 
