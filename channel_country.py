@@ -62,9 +62,10 @@ class ChannelCountryScraper(object):
         soup = BeautifulSoup(self.current_html, 'html.parser')
         for i in soup.find_all("td", class_="style-scope ytd-channel-about-metadata-renderer"):
             # cuntry_i_replace = str(i).replace('\n','')
-            cuntry_i_findall = re.findall('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">.*</yt-formatted-string>', str(i))
-            cuntry_i_str = ",".join(cuntry_i_findall)
-            cuntry = str(cuntry_i_str).replace('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">', '').replace('</yt-formatted-string>', '').strip()
+            cuntry_i_findall = re.findall('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">.*</yt-formatted-string>', str(i)).title
+            print(cuntry_i_findall)
+            # cuntry_i_str = ",".join(cuntry_i_findall)
+            # cuntry = str(cuntry_i_str).replace('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">', '').replace('</yt-formatted-string>', '').strip()
             '''
             NoneExclusion
             '''
@@ -72,7 +73,7 @@ class ChannelCountryScraper(object):
                 cuntry = None
             if cuntry is None:
                 continue
-            print(cuntry)
+            print("cuntry")
             # self.country
 
 
