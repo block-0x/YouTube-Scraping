@@ -30,7 +30,7 @@ class ChannelCountryScraper(object):
 
 
     def read_youtube_urls(self):
-        channel_url_data = pd.read_csv('sample.csv',index_col='channel_url')
+        channel_url_data = pd.read_csv('./data/youtube_channel_list.csv',index_col='channel_url')
         channel_urls_ndarray = channel_url_data.index.values
         channel_urls = channel_urls_ndarray.tolist()
         for i in channel_urls:
@@ -68,8 +68,8 @@ class ChannelCountryScraper(object):
         '''
         channelSubscriberOfIntExtractionFunction
         '''
-        
         channel_subscriber_i = soup.find("yt-formatted-string", class_="style-scope ytd-c4-tabbed-header-renderer")
+        print(channel_subscriber_i)
         channel_subscriber_lstrip = str(channel_subscriber_i).lstrip('<yt-formatted-string class="style-scope ytd-c4-tabbed-header-renderer" id="subscriber-count">')
         channel_subscriber_rstrip = channel_subscriber_lstrip.rstrip('</yt-formatted-string>')
         if "万" in channel_subscriber_rstrip:
@@ -77,9 +77,13 @@ class ChannelCountryScraper(object):
             channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
             channel_subscriber_add_million = channel_subscriber_sub + '00'
             channel_subscriber_material = int(channel_subscriber_add_million)
+        elif "!--css-build:sh" in channel_subscriber_rstrip:
+            print(channel_subscriber_rstrip)
+            channel_subscriber_material = None
         else:
             channel_subscriber_replace = channel_subscriber_rstrip.replace(' ', '')
             channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
+            print(channel_subscriber_sub)
             channel_subscriber_material = int(channel_subscriber_sub)
             '''
             CuntryOfIntExtractionFunction
@@ -102,22 +106,24 @@ class ChannelCountryScraper(object):
             if cuntry is None:
                 continue
             if str(cuntry):
+                print(cuntry)
+                print(channel_subscriber)
                 self.channel_countries.append(cuntry)
                 self.channel_subscribers.append(channel_subscriber)
 
 
 
     def channel_country_additional(self):
-        df = pd.read_csv('sample.csv')
+        df = pd.read_csv('./data/youtube_channel_list.csv')
         df['channel_country'] = self.channel_countries
-        pd.DataFrame(df).to_csv('sample.csv',index=False)
+        pd.DataFrame(df).to_csv('./data/youtube_channel_list.csv',index=False)
 
 
     def channel_subscriber_additional(self):
         print(self.channel_subscribers)
-        df = pd.read_csv('sample.csv')
+        df = pd.read_csv('./data/youtube_channel_list.csv')
         df['channel_subscriber'] = self.channel_subscribers
-        pd.DataFrame(df).to_csv('sample.csv',index=False)
+        pd.DataFrame(df).to_csv('./data/youtube_channel_list.csv',index=False)
         print(df)
 
 
