@@ -8,8 +8,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import re
 import time
+import datetime
 import csv
-# import run
 
 
 class YoutubeChannelVideoScraper(object):
@@ -20,12 +20,12 @@ class YoutubeChannelVideoScraper(object):
         '''
         self.youtube_url = "https://www.youtube.com"
         self.user_name = "EGA-CHANNEL1"
+        self.channel_videos_url = os.path.join(self.youtube_url, 'c', self.user_name, 'videos')
         '''
         csv_file_path
         '''
-        self.csv_file_name = "./data/youtube_channel_raw_data"
-        self.csv_file_path = os.path.join(os.getcwd(), self.csv_file_name+'.csv')
-        self.channel_videos_url = os.path.join(self.youtube_url, 'c', self.user_name, 'videos')
+        # self.csv_file_name = "./data/youtube_channel_raw_data"
+        # self.csv_file_path = os.path.join(os.getcwd(), self.csv_file_name+'.csv')
         '''
         extraction_data
         '''
@@ -42,10 +42,11 @@ class YoutubeChannelVideoScraper(object):
     def run(self):
         self.get_page_source()
         self.parse_video_title_and_url_and_view()
-        # self.mean_view()
-        # self.mean_comparison()
         self.new_csv_file()
         self.save_as_csv_file()
+        self.mean_view()
+        self.mean_comparison()
+        self.add_as_csv_file()
         self.driver.close()
 
 
@@ -157,27 +158,9 @@ class YoutubeChannelVideoScraper(object):
                 self.create_stamps.append(create_stamp)
 
 
-    # def mean_view(self):
-    #     views = self.views
-    #     s = sum(views)
-    #     N = len(views)
-    #     mean_view_material = s / N
-    #     mean_view = round(mean_view_material)
-    #     # print(mean_view)
-    #     print(self.mean_views.append(mean_view))
-    #     self.mean_views.append(mean_view)
-
-
-    # def mean_comparison(self):
-    #     view = self.views
-    #     mean_view = self.mean_views
-    #     mean_comparison = (view / mean_view) * 100
-    #     print(mean_comparison)
-    #     self.mean_comparisons.append(mean_comparison)
-
-
     def new_csv_file(self):
-        self.new_csv_file_path = os.path.join('./data/'+self.user_name+'.csv')
+        today = datetime.date.today()
+        self.new_csv_file_path = os.path.join('./data/'+self.user_name+str(today)+'.csv')
         open('%s' % self.new_csv_file_path, 'w')
 
 
@@ -188,12 +171,37 @@ class YoutubeChannelVideoScraper(object):
          "view": self.views,
          "channel_name": self.channel_names,
          "channel_subscriber": self.channel_subscribers,
-         "create_stamp": self.create_stamps,
-         # "mean_view": self.mean_views,
-         # "mean_comparison": self.mean_comparisons
+         "create_stamp": self.create_stamps
         }
         pd.DataFrame(data).to_csv(self.new_csv_file_path,index=False)
 
+
+    def mean_view(self):
+        df = pd.read_csv(self.new_csv_file_path)
+        views = self.views
+        s = sum(views)
+        N = len(views)
+        mean_view_material = s / N
+        self.mean_view = round(mean_view_material)
+        for i in views:
+            self.mean_views.append(self.mean_view)
+
+
+    def mean_comparison(self):
+        df = pd.read_csv(self.new_csv_file_path)
+        views = self.views
+        mean_view = self.mean_views
+        for i in views:
+            mean_comparison_material = (i / self.mean_view) * 100
+            mean_comparison = round(mean_comparison_material)
+            self.mean_comparisons.append(mean_comparison)
+
+
+    def add_as_csv_file(self):
+        df = pd.read_csv(self.new_csv_file_path)
+        df['mean_view'] = self.mean_views
+        df['mean_comparison'] = self.mean_comparisons
+        pd.DataFrame(df).to_csv(self.new_csv_file_path,index=False)
 
 
 if __name__ == "__main__":
