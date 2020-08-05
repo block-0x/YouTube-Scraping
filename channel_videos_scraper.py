@@ -10,7 +10,10 @@ import re
 import time
 import datetime
 import csv
-
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
 
 class YoutubeChannelVideoScraper(object):
 
@@ -18,9 +21,9 @@ class YoutubeChannelVideoScraper(object):
         '''
         youtube_url
         '''
-        self.youtube_url = "https://www.youtube.com"
-        self.user_name = "EGA-CHANNEL1"
-        self.channel_videos_url = os.path.join(self.youtube_url, 'c', self.user_name, 'videos')
+        # self.youtube_url = "https://www.youtube.com"
+        # self.user_name = "EGA-CHANNEL1"
+        # self.channel_videos_url = os.path.join(self.youtube_url, 'c', self.user_name, 'videos')
         '''
         csv_file_path
         '''
@@ -29,6 +32,7 @@ class YoutubeChannelVideoScraper(object):
         '''
         extraction_data
         '''
+        self.channel_videos_urls = []
         self.titles = []
         self.video_urls = []
         self.views = []
@@ -40,6 +44,7 @@ class YoutubeChannelVideoScraper(object):
 
 
     def run(self):
+        self.read_channel_urls()
         self.get_page_source()
         self.parse_video_title_and_url_and_view()
         self.new_csv_file()
@@ -50,33 +55,46 @@ class YoutubeChannelVideoScraper(object):
         self.driver.close()
 
 
+    def read_channel_urls(self):
+        channel_url_data = pd.read_csv('./data/youtube_channel_list.csv',index_col='channel_url')
+        channel_urls_ndarray = channel_url_data.index.values
+        channel_urls = channel_urls_ndarray.tolist()
+        for i in channel_urls:
+            youtube_url = 'https://www.youtube.com'
+            self.channel_url = ('%s' % i)
+            # videos_url = 'videos'
+            channel_videos_url = urlparse.urljoin(youtube_url, self.channel_url+'/videos')
+            self.channel_videos_urls.append(channel_videos_url)
+
+
     def get_page_source(self):
         self.driver = webdriver.Chrome()
-        self.driver.get(self.channel_videos_url)
-        self.current_html = self.driver.page_source
-        element = self.driver.find_element_by_xpath('//*[@class="style-scope ytd-page-manager"]')
-        actions = ActionChains(self.driver)
-        actions.move_to_element(element)
-        actions.perform()
-        actions.reset_actions()
-        while True:
-            for j in range(100):
-                actions.send_keys(Keys.PAGE_DOWN)
+        for i in self.channel_videos_urls:
+            self.driver.get(i)
+            self.current_html = self.driver.page_source
+            element = self.driver.find_element_by_xpath('//*[@class="style-scope ytd-page-manager"]')
+            actions = ActionChains(self.driver)
+            actions.move_to_element(element)
             actions.perform()
-            sleep(2)
-            html = self.driver.page_source
-            if self.current_html != html:
-                self.current_html=html
-                '''
-                開発時に使用
-                '''
-                # t = 0
-                # start = time.time()
-                # t = time.time() - start
-                # t == 20
-                # break
-            else:
-                break
+            actions.reset_actions()
+            while True:
+                for j in range(100):
+                    actions.send_keys(Keys.PAGE_DOWN)
+                actions.perform()
+                sleep(2)
+                html = self.driver.page_source
+                if self.current_html != html:
+                    self.current_html=html
+                    '''
+                    開発時に使用
+                    '''
+                    t = 0
+                    start = time.time()
+                    t = time.time() - start
+                    t == 20
+                    break
+                else:
+                    break
 
 
     def parse_video_title_and_url_and_view(self):
@@ -87,6 +105,7 @@ class YoutubeChannelVideoScraper(object):
         channel_name_i = soup.find("yt-formatted-string", class_="style-scope ytd-channel-name")
         channel_name_lstrip = str(channel_name_i).lstrip('<yt-formatted-string class="style-scope ytd-channel-name" id="text" title="">')
         channel_name_rstrip = channel_name_lstrip.rstrip('</yt-formatted-string>')
+        self.channel_name_rstrip = str(channel_name_rstrip)
         '''
         ChannelSubscriberOfIntExtractionFunction
         '''
@@ -160,7 +179,8 @@ class YoutubeChannelVideoScraper(object):
 
     def new_csv_file(self):
         today = datetime.date.today()
-        self.new_csv_file_path = os.path.join('./data/'+self.user_name+str(today)+'.csv')
+        channel_name = self.channel_name_rstrip
+        self.new_csv_file_path = os.path.join('./data/'+channel_name+str(today)+'.csv')
         open('%s' % self.new_csv_file_path, 'w')
 
 
