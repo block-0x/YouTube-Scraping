@@ -78,10 +78,20 @@ class ChannelCountryAndScraper(object):
         channel_subscriber_lstrip = str(channel_subscriber_i).lstrip('<yt-formatted-string class="style-scope ytd-c4-tabbed-header-renderer" id="subscriber-count">')
         channel_subscriber_rstrip = channel_subscriber_lstrip.rstrip('</yt-formatted-string>')
         if "万" in channel_subscriber_rstrip:
+            print(channel_subscriber_rstrip)
             channel_subscriber_replace = channel_subscriber_rstrip.replace(' ', '')
-            channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
-            channel_subscriber_add_million = channel_subscriber_sub + '00'
-            channel_subscriber_material = int(channel_subscriber_add_million)
+            # print(channel_subscriber_replace)
+            if "." in channel_subscriber_rstrip:
+                # print(channel_subscriber_replace)
+                channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
+                print(channel_subscriber_sub)
+                channel_subscriber_add_million = channel_subscriber_sub + '00'
+                channel_subscriber_material = int(channel_subscriber_add_million)
+            else:
+                channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
+                print(channel_subscriber_sub)
+                channel_subscriber_add_million = channel_subscriber_sub + '0000'
+                channel_subscriber_material = int(channel_subscriber_add_million)
         elif "!--css-build:sh" in channel_subscriber_rstrip:
             channel_subscriber_material = None
         else:
