@@ -11,6 +11,7 @@ import time
 import csv
 # import run
 
+
 class YoutubeChannelVideoScraper(object):
 
     def __init__(self):
@@ -35,12 +36,15 @@ class YoutubeChannelVideoScraper(object):
         self.channel_subscribers = []
         self.create_stamps = []
         self.mean_views = []
+        self.mean_comparisons = []
 
 
     def run(self):
         self.get_page_source()
         self.parse_video_title_and_url_and_view()
-        self.mean_views_function()
+        # self.mean_view()
+        # self.mean_comparison()
+        self.new_csv_file()
         self.save_as_csv_file()
         self.driver.close()
 
@@ -98,10 +102,14 @@ class YoutubeChannelVideoScraper(object):
             channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
             channel_subscriber_material = int(channel_subscriber_sub)
         for i in soup.find_all("a"):
-# import run            title = (i.get("title"))
-# import run            url = (i.get("href"))
-# import run            view_material_i = (i.get("aria-label"))
-# import run            create_stamp_material_i = (i.get("aria-label"))
+            # title
+            title = (i.get("title"))
+            # url
+            url = (i.get("href"))
+            # view
+            view_material_i = (i.get("aria-label"))
+            # create_stamp
+            create_stamp_material_i = (i.get("aria-label"))
             '''
             NoneExclusion
             '''
@@ -149,15 +157,43 @@ class YoutubeChannelVideoScraper(object):
                 self.create_stamps.append(create_stamp)
 
 
+    # def mean_view(self):
+    #     views = self.views
+    #     s = sum(views)
+    #     N = len(views)
+    #     mean_view_material = s / N
+    #     mean_view = round(mean_view_material)
+    #     # print(mean_view)
+    #     print(self.mean_views.append(mean_view))
+    #     self.mean_views.append(mean_view)
+
+
+    # def mean_comparison(self):
+    #     view = self.views
+    #     mean_view = self.mean_views
+    #     mean_comparison = (view / mean_view) * 100
+    #     print(mean_comparison)
+    #     self.mean_comparisons.append(mean_comparison)
+
+
+    def new_csv_file(self):
+        self.new_csv_file_path = os.path.join('./data/'+self.user_name+'.csv')
+        open('%s' % self.new_csv_file_path, 'w')
+
+
     def save_as_csv_file(self):
         data = {
-            "title": self.titles,
-            "url": self.video_urls,
-            "view": self.views,
-            "channel_name": self.channel_names,
-            "channel_subscriber": self.channel_subscribers,
-            "create_stamp": self.create_stamps,
-        pd.DataFrame(data).to_csv(self.csv_file_path,index=False)
+         "title": self.titles,
+         "url": self.video_urls,
+         "view": self.views,
+         "channel_name": self.channel_names,
+         "channel_subscriber": self.channel_subscribers,
+         "create_stamp": self.create_stamps,
+         # "mean_view": self.mean_views,
+         # "mean_comparison": self.mean_comparisons
+        }
+        pd.DataFrame(data).to_csv(self.new_csv_file_path,index=False)
+
 
 
 if __name__ == "__main__":
