@@ -35,7 +35,7 @@ class YouTubeSearchScraper(object):
         self.views = []
         self.channel_urls = []
         self.channel_names = []
-        self.video_times = []
+        self.video_lengths = []
         self.create_stamps = []
 
 
@@ -117,9 +117,9 @@ class YouTubeSearchScraper(object):
             '''
             VideoTimeOfIntExtractionFunction
             '''
-            video_time_i = re.findall('</yt-icon><span aria-label=".* class="style-scope ytd-thumbnail-overlay-time-status-renderer"', str(i))
-            video_time_i_str = ",".join(video_time_i)
-            video_time = video_time_i_str.replace('</yt-icon><span aria-label="', '').replace('" class="style-scope ytd-thumbnail-overlay-time-status-renderer"', '')
+            video_length_i = re.findall('</yt-icon><span aria-label=".* class="style-scope ytd-thumbnail-overlay-time-status-renderer"', str(i))
+            video_length_i_str = ",".join(video_length_i)
+            video_length = video_length_i_str.replace('</yt-icon><span aria-label="', '').replace('" class="style-scope ytd-thumbnail-overlay-time-status-renderer"', '')
             material = re.findall('id="video-title" title=".*">', str(i))
             '''
             CreateAtOfIntExtractionFunction
@@ -140,9 +140,9 @@ class YouTubeSearchScraper(object):
                 continue
             elif channel_name is None:
                 continue
-            elif video_time is None:
+            elif video_length is None:
                 continue
-            elif video_time is None:
+            elif video_length is None:
                 continue
             if "/watch?v=" in video_url:
                 self.titles.append(title)
@@ -150,7 +150,7 @@ class YouTubeSearchScraper(object):
                 self.views.append(view)
                 self.channel_urls.append(channel_url)
                 self.channel_names.append(channel_name)
-                self.video_times.append(video_time)
+                self.video_lengths.append(video_length)
                 self.create_stamps.append(create_stamp)
 
 
@@ -161,12 +161,11 @@ class YouTubeSearchScraper(object):
          "view": self.views,
          "channel_url": self.channel_urls,
          "channel_name": self.channel_names,
-         "video_time": self.video_times,
+         "video_length": self.video_lengths,
          "create_stamp": self.create_stamps
         }
         print(self.channel_names)
-        pd.DataFrame(data).to_csv(self.search_data_csv_file_path,index=False)
-        # self.driver.close()
+        pd.DataFrame(data).to_csv(self.search_data_csv_file_path,index=True)
 
 
     def channel_list_save_as_csv_file(self):
@@ -179,8 +178,7 @@ class YouTubeSearchScraper(object):
          "channel_url": channel_urls,
          "channel_name": channel_names
         }
-        pd.DataFrame(data).to_csv(self.channel_list_csv_file_path,index=False)
-        
+        pd.DataFrame(data).to_csv(self.channel_list_csv_file_path,index=True)
 
 
 if __name__ == "__main__":
