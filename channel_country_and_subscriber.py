@@ -14,7 +14,7 @@ except ImportError:
     import urllib.parse as urlparse
 
 
-class ChannelCountryScraper(object):
+class ChannelCountryAndScraper(object):
 
     def __init__(self):
         self.channel_about_urls = []
@@ -144,5 +144,5 @@ class ChannelCountryScraper(object):
 
 
 if __name__ == "__main__":
-    channel_country = ChannelCountryScraper()
+    channel_country = ChannelCountryAndScraper()
     channel_country.run()
