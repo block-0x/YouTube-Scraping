@@ -24,14 +24,14 @@ class ChannelCountryAndScraper(object):
 
 
     def run(self):
-        self.read_youtube_urls()
+        self.read_channel_urls()
         self.get_page_source()
         self.channel_country_additional()
         self.channel_subscriber_additional()
         self.driver.close()
 
 
-    def read_youtube_urls(self):
+    def read_channel_urls(self):
         channel_url_data = pd.read_csv('./data/youtube_channel_list.csv',index_col='channel_url')
         channel_urls_ndarray = channel_url_data.index.values
         channel_urls = channel_urls_ndarray.tolist()
