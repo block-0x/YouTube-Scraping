@@ -149,17 +149,14 @@ class YoutubeChannelVideoScraper(object):
                 self.create_stamps.append(create_stamp)
 
 
-# import run
-
     def save_as_csv_file(self):
         data = {
-         "title": self.titles,
-         "url": self.video_urls,
-         "view": self.views,
-         "channel_name": self.channel_names,
-         "channel_subscriber": self.channel_subscribers,
-         "create_stamp": self.create_stamps,
-# import run        }
+            "title": self.titles,
+            "url": self.video_urls,
+            "view": self.views,
+            "channel_name": self.channel_names,
+            "channel_subscriber": self.channel_subscribers,
+            "create_stamp": self.create_stamps,
         pd.DataFrame(data).to_csv(self.csv_file_path,index=False)
 
 

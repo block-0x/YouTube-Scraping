@@ -62,14 +62,14 @@ class YouTubeSearchScraper(object):
             for j in range(100):
                 actions.send_keys(Keys.PAGE_DOWN)
             actions.perform()
-            sleep(2.5)
+            sleep(2)
             html = self.driver.page_source
             if self.current_html != html:
                 self.current_html=html
                 t = 0
                 start = time.time()
                 t = time.time() - start
-                t == 20
+                t == 5
                 break
             # else:
             #     break
@@ -164,7 +164,7 @@ class YouTubeSearchScraper(object):
          "video_length": self.video_lengths,
          "create_stamp": self.create_stamps
         }
-        print(self.channel_names)
+        # print(self.channel_names)
         pd.DataFrame(data).to_csv(self.search_data_csv_file_path,index=True)
 
 
@@ -172,11 +172,10 @@ class YouTubeSearchScraper(object):
         '''
         Duplicate deletion
         '''
-        channel_urls = (list(set(self.channel_urls)))
-        channel_names = (list(set(self.channel_names)))
+        # print(self.channel_urls,)
         data = {
-         "channel_url": channel_urls,
-         "channel_name": channel_names
+         "channel_url": self.channel_urls,
+         "channel_name": self.channel_names
         }
         pd.DataFrame(data).to_csv(self.channel_list_csv_file_path,index=True)
 
