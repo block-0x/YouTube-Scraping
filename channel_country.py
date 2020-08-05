@@ -7,22 +7,17 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import re
 import numpy as np
+import regex
 try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
-'''
-pip install regex
-'''
-import regex
 
 
 class ChannelCountryScraper(object):
 
     def __init__(self):
         self.channel_about_urls = []
-        # self.channel_countries = []
-        # self.channel_subscribers = []
         self.nihongo_channel_countries = []
         self.channel_subscribers_true = []
 
@@ -30,7 +25,6 @@ class ChannelCountryScraper(object):
     def run(self):
         self.read_youtube_urls()
         self.get_page_source()
-        # self.country_nihongo_true()
         self.channel_country_additional()
         self.channel_subscriber_additional()
         self.driver.close()
@@ -97,19 +91,9 @@ class ChannelCountryScraper(object):
             countryOfIntExtractionFunction
             '''
         for i in soup.find_all("td", class_="style-scope ytd-channel-about-metadata-renderer"):
-            # i_x = ('{0}:{1}'.format(i, td_i[i]))
             country_i_findall = re.findall('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">.*</yt-formatted-string>', str(i))
             country_i_replace = str(country_i_findall).replace('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">', '').replace('</yt-formatted-string>', '')
             country = str(country_i_replace).replace("['", '').replace("']", '')
-            # print(country)
-            # print(country)
-            # print(country)
-            # country_item = country[i]
-            # print(country_item)
-            # country_index = ('{0}:{1}'.format(i, country))
-            # print(country_index)
-            # i_x = ('{0}:{1}'.format(i, td_i[i]))
-            # print(country)
             '''
             channelSubscriberOfIntExtractionFunction
             '''
@@ -123,67 +107,31 @@ class ChannelCountryScraper(object):
                 country = None
             if "[]" in str(country):
                 country = None
-            # if country is None:
-            #     continue
-            # if False in country:
-            #     country = None
-            # if str(country).isnumeric():
-            #     country += country
-            # if country == 0:
-            #     country = None
-            # if  is country:
-            #     country = None
-            # print(country)
             self.channel_countries.append(country)
-            # self.country_nihongo_true()
             self.channel_subscribers.append(channel_subscriber)
 
 
     def country_nihongo_true(self):
-        # print(self.channel_countries)
         country_list = self.channel_countries
-        # print(country_list)
-        # print(country_list)
-        # print
         country_list_join = ','.join(str(country_list))
         country_list_join_replace = country_list_join.replace(',', '')
-        # country_list_str_replace_list = (list(country_list_str_replace))
-        # country_list_str_replace_findall = (re.findall('[ぁ-ゟ]+', str(country_list_str_replace_list)))
-        # print(country_list_str_replace_findall)
-        # print(country_list_str_replace)
-        # print(('%s' % country_list_str_replace))
-        # p = regex.compile(r'\p{Script_Extensions=Han}+')
-        # print(p.fullmatch("NoneNone日本"))
         nihongo = regex.compile('[\u2E80-\u2FDF\u3005-\u3007\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\U00020000-\U0002EBEF]+')
         country = (nihongo.findall(str(country_list_join_replace)))
-        # print(country_list_join)
         if "[]" in str(country):
             country = '非表示'
         if "[" in str(country):
             country = str(country).replace("['", '').replace("']", '')
-        # if "[" in str(country):
-        #     country = ','.join(country).replace(',', '')
-        # country
         self.nihongo_channel_countries.append(str(country))
-        # print(self.nihongo_channel_countries)
-        # print
 
 
     def channel_subscriber_set(self):
         subscriber_list =  self.channel_subscribers
-        # subscriber_list_join = ','.join(str(subscriber_list))
-        # subscriber_list_join_replace = subscriber_list_join.replace(',', '')
         subscriber = (list(set(subscriber_list)))
-        # print(subscriber)
-        # if "[]" in str(subscriber):
-        #     subscriber = 0
         subscriber = str(subscriber).replace("[", '').replace("]", '')
         self.channel_subscribers_true.append(subscriber)
 
 
-
     def channel_country_additional(self):
-        # print(str(self.channel_countries))
         df = pd.read_csv('./data/youtube_channel_list.csv')
         df['channel_country'] = self.nihongo_channel_countries
         pd.DataFrame(df).to_csv('./data/youtube_channel_list.csv',index=False)
