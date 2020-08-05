@@ -1,0 +1,16 @@
+<div class="style-scope ytd-c4-tabbed-header-renderer" id="meta"><ytd-channel-name class="style-scope ytd-c4-tabbed-header-renderer" id="channel-name" wrap-text=""><!--css-build:shady-->
+<div class="style-scope ytd-channel-name" id="container">
+<div class="style-scope ytd-channel-name" id="text-container">
+<yt-formatted-string class="style-scope ytd-channel-name" id="text" title="">琥珀ねね</yt-formatted-string>
+</div>Z
+<paper-tooltip class="style-scope ytd-channel-name" fit-to-visible-bounds="" offset="10" role="tooltip" tabindex="-1"><!--css-build:shady-->
+<div class="hidden style-scope paper-tooltip" id="tooltip">
+      
+        琥珀ねね
+      
+    </div>
+</paper-tooltip>
+</div>
+<ytd-badge-supported-renderer class="style-scope ytd-channel-name" disable-upgrade="" hidden="">
+</ytd-badge-supported-renderer>
+</ytd-channel-name><yt-formatted-string class="style-scope ytd-c4-tabbed-header-renderer" id="subscriber-count">チャンネル登録者数 2.27万人</yt-formatted-string></div>
