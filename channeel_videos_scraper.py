@@ -11,19 +11,6 @@ import time
 import csv
 # import run
 
-# f = open('youtube_channel_list.csv', 'ab')
-# dataWriter = csv.writer(f)
-
-# val = 0
-# rowList = []
-# for num in range(1, 5):
-#         val = num
-#         rowList.append([])              #空の配列を追加する
-#         rowList[num-1].append(val)        #配列にデータを追加していく
-#         for mul in range(0, 5):
-#                 val = val * 10 + num
-#                 rowList[num - 1].append(val)
-
 class YoutubeChannelVideoScraper(object):
 
     def __init__(self):
@@ -75,14 +62,16 @@ class YoutubeChannelVideoScraper(object):
             html = self.driver.page_source
             if self.current_html != html:
                 self.current_html=html
-                t = 0
-                start = time.time()
-                t = time.time() - start
-                t == 20
+                '''
+                開発時に使用
+                '''
+                # t = 0
+                # start = time.time()
+                # t = time.time() - start
+                # t == 20
+                # break
+            else:
                 break
-            # else:
-            #     break
-
 
 
     def parse_video_title_and_url_and_view(self):
@@ -109,14 +98,10 @@ class YoutubeChannelVideoScraper(object):
             channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
             channel_subscriber_material = int(channel_subscriber_sub)
         for i in soup.find_all("a"):
-            # title
-            title = (i.get("title"))
-            # url
-            url = (i.get("href"))
-            # view
-            view_material_i = (i.get("aria-label"))
-            # create_stamp
-            create_stamp_material_i = (i.get("aria-label"))
+# import run            title = (i.get("title"))
+# import run            url = (i.get("href"))
+# import run            view_material_i = (i.get("aria-label"))
+# import run            create_stamp_material_i = (i.get("aria-label"))
             '''
             NoneExclusion
             '''
@@ -164,16 +149,7 @@ class YoutubeChannelVideoScraper(object):
                 self.create_stamps.append(create_stamp)
 
 
-    # def mean_views_function(self):
-    #     views = self.views
-    #     s = sum(views)
-    #     N = len(views)
-    #     mean_view_material = s / N
-    #     mean_view = round(mean_view_material)
-    #     # print(mean_view)
-    #     # print(self.mean_views.append(mean_view))
-    #     self.mean_views.append(mean_view)
-
+# import run
 
     def save_as_csv_file(self):
         data = {
@@ -183,8 +159,7 @@ class YoutubeChannelVideoScraper(object):
          "channel_name": self.channel_names,
          "channel_subscriber": self.channel_subscribers,
          "create_stamp": self.create_stamps,
-         # "mean_view": self.mean_views
-        }
+# import run        }
         pd.DataFrame(data).to_csv(self.csv_file_path,index=False)
 
 
