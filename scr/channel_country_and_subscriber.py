@@ -13,7 +13,8 @@ try:
 except ImportError:
     import urllib.parse as urlparse
 # import run
-
+import gspread
+import json
 
 class ChannelCountryAndScraper(object):
 
@@ -32,13 +33,13 @@ class ChannelCountryAndScraper(object):
 
 
     def read_channel_urls(self):
-        channel_url_data = pd.read_csv('./data/youtube_channel_list.csv',index_col='channel_url')
+        channel_url_data = pd.read_csv('./../data/youtube_channel_list.csv',index_col='channel_url')
         channel_urls_ndarray = channel_url_data.index.values
         channel_urls = channel_urls_ndarray.tolist()
         for i in channel_urls:
             youtube_url = 'https://www.youtube.com'
             self.channel_url = ('%s' % i)
-            about_url = 'about'
+            # about_url = 'about'
             channel_about_url = urlparse.urljoin(youtube_url, self.channel_url+'/about')
             self.channel_about_urls.append(channel_about_url)
 
@@ -143,15 +144,15 @@ class ChannelCountryAndScraper(object):
 
 
     def channel_country_additional(self):
-        df = pd.read_csv('./data/youtube_channel_list.csv')
+        df = pd.read_csv('data/youtube_channel_list.csv')
         df['channel_country'] = self.nihongo_channel_countries
-        pd.DataFrame(df).to_csv('./data/youtube_channel_list.csv',index=False)
+        pd.DataFrame(df).to_csv('data/youtube_channel_list.csv',index=False)
 
 
     def channel_subscriber_additional(self):
-        df = pd.read_csv('./data/youtube_channel_list.csv')
+        df = pd.read_csv('data/youtube_channel_list.csv')
         df['channel_subscriber'] = self.channel_subscribers_true
-        pd.DataFrame(df).to_csv('./data/youtube_channel_list.csv',index=False)
+        pd.DataFrame(df).to_csv('data/youtube_channel_list.csv',index=False)
 
 
 if __name__ == "__main__":

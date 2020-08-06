@@ -7,7 +7,13 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import re
 import time
+import gspread
+import json
 # import run
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
 
 
 class YouTubeSearchScraper(object):
@@ -16,20 +22,21 @@ class YouTubeSearchScraper(object):
         '''
         youtube_url
         '''
-        self.search_query = "asmr"
-        self.youtube_url = "https://www.youtube.com/"
-        self.search_url = "results?search_query="
-        self.search_video_url = os.path.join(self.youtube_url, self.search_url, self.search_query)
+        # self.search_query = "asmr mukbang"
+        # self.youtube_url = "https://www.youtube.com/"
+        # self.search_url = "results?search_query="
+        # self.search_video_url = os.path.join(self.youtube_url, self.search_url, self.search_query)
         '''
         csv_file_path
         '''
-        self.search_data_csv_file_name = "./data/youtube_search_raw_data"
-        self.channel_list_csv_file_name = "./data/youtube_channel_list"
-        self.search_data_csv_file_path = os.path.join(os.getcwd(), self.search_data_csv_file_name+'.csv')
+        self.search_data_csv_file_name = "./../data/youtube_search_csv_data"
+        self.channel_list_csv_file_name = "./../data/youtube_channel_list"
+        self.search_csv_data_file_path = os.path.join(os.getcwd(), self.search_data_csv_file_name+'.csv')
         self.channel_list_csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
         '''
         extraction_data
         '''
+        self.search_urls = []
         self.titles = []
         self.video_urls = []
         self.views = []
@@ -40,6 +47,7 @@ class YouTubeSearchScraper(object):
 
 
     def run(self):
+        self.read_search_query()
         self.get_page_source()
         self.parse_youtube_search_information()
         self.search_data_save_as_csv_file()
@@ -48,30 +56,43 @@ class YouTubeSearchScraper(object):
         self.driver.close()
 
 
+    def read_search_query(self):
+        search_query_csv = pd.read_csv('./../data/search_list.csv',index_col='search_query')
+        search_query_values = search_query_csv.index.values
+        search_queries = search_query_values.tolist()
+        for i in search_queries:
+            youtube_url = 'https://www.youtube.com'
+            self.youtube_search_url = 'results?search_query='
+            self.search_query = ('%s' % i)
+            search_url = urlparse.urljoin(youtube_url, 'results?search_query='+self.search_query)
+            self.search_urls.append(search_url)
+
+
     def get_page_source(self):
         self.driver = webdriver.Chrome()
-        self.driver.get(self.search_video_url)
-        self.current_html = self.driver.page_source
-        element = self.driver.find_element_by_xpath('//*[@class="style-scope ytd-page-manager"]')
-        actions = ActionChains(self.driver)
-        actions.move_to_element(element)
-        actions.perform()
-        actions.reset_actions()
-        while True:
-            for j in range(100):
-                actions.send_keys(Keys.PAGE_DOWN)
+        for i in self.search_urls:
+            self.driver.get(i)
+            self.current_html = self.driver.page_source
+            element = self.driver.find_element_by_xpath('//*[@class="style-scope ytd-page-manager"]')
+            actions = ActionChains(self.driver)
+            actions.move_to_element(element)
             actions.perform()
-            sleep(2)
-            html = self.driver.page_source
-            if self.current_html != html:
-                self.current_html=html
-                t = 0
-                start = time.time()
-                t = time.time() - start
-                t == 20
-                break
-            # else:
-            #     break
+            actions.reset_actions()
+            while True:
+                for j in range(100):
+                    actions.send_keys(Keys.PAGE_DOWN)
+                actions.perform()
+                sleep(2)
+                html = self.driver.page_source
+                if self.current_html != html:
+                    self.current_html=html
+                    t = 0
+                    start = time.time()
+                    t = time.time() - start
+                    t == 10
+                    break
+                # else:
+                #     break
 
 
     def parse_youtube_search_information(self):
@@ -163,7 +184,7 @@ class YouTubeSearchScraper(object):
          "video_length": self.video_lengths,
          "create_stamp": self.create_stamps
         }
-        pd.DataFrame(data).to_csv(self.search_data_csv_file_path,index=False)
+        pd.DataFrame(data).to_csv(self.search_csv_data_file_path,index=False)
 
 
     def channel_list_save_as_csv_file(self):
@@ -171,11 +192,15 @@ class YouTubeSearchScraper(object):
          "channel_url": self.channel_urls,
          "channel_name": self.channel_names
         }
-        pd.DataFrame(data).to_csv(self.channel_list_csv_file_path,index=False)
+        pd_index = pd.read_csv(self.channel_list_csv_file_path)
+        if None in pd_index.index.values:
+            pd.DataFrame(data).to_csv(self.channel_list_csv_file_path,index=False)
+        else:
+            pd.DataFrame(data).to_csv(self.channel_list_csv_file_path, mode='a', header=False, index=False)
 
 
     def csv_file_drop_duplicate(self):
-        df = pd.read_csv('./data/youtube_channel_list.csv')
+        df = pd.read_csv('./../data/youtube_channel_list.csv')
         df_drop_duplicate = df.drop_duplicates()
         pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=True)
 
