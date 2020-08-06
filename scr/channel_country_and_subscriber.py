@@ -81,18 +81,20 @@ class ChannelCountryAndScraper(object):
         channel_subscriber_lstrip = str(channel_subscriber_i).lstrip('<yt-formatted-string class="style-scope ytd-c4-tabbed-header-renderer" id="subscriber-count">')
         channel_subscriber_rstrip = channel_subscriber_lstrip.rstrip('</yt-formatted-string>')
         if "万" in channel_subscriber_rstrip:
-            print(channel_subscriber_rstrip)
             channel_subscriber_replace = channel_subscriber_rstrip.replace(' ', '')
-            # print(channel_subscriber_replace)
             if "." in channel_subscriber_rstrip:
-                # print(channel_subscriber_replace)
-                channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
-                print(channel_subscriber_sub)
-                channel_subscriber_add_million = channel_subscriber_sub + '00'
-                channel_subscriber_material = int(channel_subscriber_add_million)
+                s = float(channel_subscriber_rstrip.lstrip('チャンネル登録者数 ').rstrip('万人'))
+                s_i, s_d = str(s).split('.')
+                if 1 is len(s_d):
+                    channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
+                    channel_subscriber_add_million = channel_subscriber_sub + '000'
+                    channel_subscriber_material = int(channel_subscriber_add_million)
+                elif 2 is len(s_d):
+                    channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
+                    channel_subscriber_add_million = channel_subscriber_sub + '00'
+                    channel_subscriber_material = int(channel_subscriber_add_million)
             else:
                 channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
-                print(channel_subscriber_sub)
                 channel_subscriber_add_million = channel_subscriber_sub + '0000'
                 channel_subscriber_material = int(channel_subscriber_add_million)
         elif "!--css-build:sh" in channel_subscriber_rstrip:
@@ -158,7 +160,6 @@ class ChannelCountryAndScraper(object):
         df_drop_duplicate = df[df['channel_subscriber'].notnull()]
         pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
         print(self.channel_list_csv_file_path+"重複削除")
-
 
 
 if __name__ == "__main__":
