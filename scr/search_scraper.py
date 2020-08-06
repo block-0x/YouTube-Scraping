@@ -8,7 +8,6 @@ from selenium.webdriver.common.keys import Keys
 import re
 import time
 import datetime
-# import run
 try:
     import urlparse
 except ImportError:
@@ -75,7 +74,7 @@ class YouTubeSearchScraper(object):
                     t = 0
                     start = time.time()
                     t = time.time() - start
-                    t == 10
+                    t == 10000
                     self.parse_search_videos()
                     self.search_data_save_as_csv_file()
                     self.channel_list_add_as_csv_file()
@@ -95,6 +94,8 @@ class YouTubeSearchScraper(object):
         self.create_stamps = []
         self.queries = []
         self.scrape_ats = []
+        self.channel_countries = []
+        self.channel_subscribers = []
         soup = BeautifulSoup(self.current_html, 'html.parser')
         for i in soup.find_all("div", id = "dismissable"):
             '''
@@ -165,6 +166,8 @@ class YouTubeSearchScraper(object):
                 continue
             queriy = self.search_query
             scrape_at = self.scrape_at
+            channel_country = None
+            channel_subscriber = None
             if "/watch?v=" in video_url:
                 self.titles.append(title)
                 self.video_urls.append(video_url)
@@ -175,6 +178,8 @@ class YouTubeSearchScraper(object):
                 self.create_stamps.append(create_stamp)
                 self.queries.append(queriy)
                 self.scrape_ats.append(scrape_at)
+                self.channel_countries.append(channel_country)
+                self.channel_subscribers.append(channel_subscriber)
 
 
     def search_data_save_as_csv_file(self):
@@ -200,7 +205,10 @@ class YouTubeSearchScraper(object):
     def channel_list_add_as_csv_file(self):
         data = {
          "channel_url": self.channel_urls,
-         "channel_name": self.channel_names
+         "channel_name": self.channel_names,
+         "scrape_at": self.scrape_ats,
+         "channel_country": self.channel_countries,
+         "channel_subscriber": self.channel_subscribers
         }
         if 0 is os.path.getsize(self.channel_list_csv_file_path):
             print(self.channel_list_csv_file_path+"新規作成")
@@ -212,7 +220,7 @@ class YouTubeSearchScraper(object):
 
     def csv_file_drop_duplicate(self):
         df = pd.read_csv('./../data/youtube_channel_list.csv')
-        df_drop_duplicate = df.drop_duplicates()
+        df_drop_duplicate = df.drop_duplicates(subset='channel_url')
         pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
         print(self.channel_list_csv_file_path+"重複削除")
 
