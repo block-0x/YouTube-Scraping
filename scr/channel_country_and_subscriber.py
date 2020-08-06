@@ -1,5 +1,6 @@
 import os.path
 from time import sleep
+import datetime
 import pandas as pd
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -12,9 +13,7 @@ try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
-# import run
-import gspread
-import json
+
 
 class ChannelCountryAndScraper(object):
 
@@ -22,24 +21,27 @@ class ChannelCountryAndScraper(object):
         self.channel_about_urls = []
         self.nihongo_channel_countries = []
         self.channel_subscribers_true = []
+        self.channel_list_csv_file_name = "./../data/youtube_channel_list"
+        self.channel_list_csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
 
 
     def run(self):
         self.read_channel_urls()
         self.get_page_source()
-        self.channel_country_additional()
-        self.channel_subscriber_additional()
+        self.channel_country_subscriber_add_as_csv_file()
+        self.csv_file_drop_duplicate()
         self.driver.close()
 
 
     def read_channel_urls(self):
-        channel_url_data = pd.read_csv('./../data/youtube_channel_list.csv',index_col='channel_url')
+        df = pd.read_csv(self.channel_list_csv_file_path)
+        self.df_update = df[df['channel_subscriber'].isnull()]
+        channel_url_data = self.df_update.set_index('channel_url')
         channel_urls_ndarray = channel_url_data.index.values
         channel_urls = channel_urls_ndarray.tolist()
         for i in channel_urls:
             youtube_url = 'https://www.youtube.com'
             self.channel_url = ('%s' % i)
-            # about_url = 'about'
             channel_about_url = urlparse.urljoin(youtube_url, self.channel_url+'/about')
             self.channel_about_urls.append(channel_about_url)
 
@@ -94,7 +96,7 @@ class ChannelCountryAndScraper(object):
                 channel_subscriber_add_million = channel_subscriber_sub + '0000'
                 channel_subscriber_material = int(channel_subscriber_add_million)
         elif "!--css-build:sh" in channel_subscriber_rstrip:
-            channel_subscriber_material = None
+            channel_subscriber_material = "非表示"
         else:
             channel_subscriber_replace = channel_subscriber_rstrip.replace(' ', '')
             channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
@@ -143,16 +145,20 @@ class ChannelCountryAndScraper(object):
         self.channel_subscribers_true.append(subscriber)
 
 
-    def channel_country_additional(self):
-        df = pd.read_csv('data/youtube_channel_list.csv')
+    def channel_country_subscriber_add_as_csv_file(self):
+        df = self.df_update
         df['channel_country'] = self.nihongo_channel_countries
-        pd.DataFrame(df).to_csv('data/youtube_channel_list.csv',index=False)
-
-
-    def channel_subscriber_additional(self):
-        df = pd.read_csv('data/youtube_channel_list.csv')
         df['channel_subscriber'] = self.channel_subscribers_true
-        pd.DataFrame(df).to_csv('data/youtube_channel_list.csv',index=False)
+        pd.DataFrame(df).to_csv(self.channel_list_csv_file_path, mode='a', header=False,index=False)
+        print(self.channel_list_csv_file_path+"国・登録者追記")
+
+
+    def csv_file_drop_duplicate(self):
+        df = pd.read_csv(self.channel_list_csv_file_path)
+        df_drop_duplicate = df[df['channel_subscriber'].notnull()]
+        pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
+        print(self.channel_list_csv_file_path+"重複削除")
+
 
 
 if __name__ == "__main__":

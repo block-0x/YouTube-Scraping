@@ -14,8 +14,7 @@ try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
-import gspread
-import json
+
 
 class YoutubeChannelVideoScraper(object):
 
