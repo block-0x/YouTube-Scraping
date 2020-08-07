@@ -32,7 +32,7 @@ class YouTubeSearchScraper(object):
         scrape_at_stmp
         '''
         self.scrape_at = datetime.date.today()
-        
+
 
     def run(self):
         self.read_search_query()
@@ -55,8 +55,8 @@ class YouTubeSearchScraper(object):
 
     def get_page_source(self):
         self.driver = webdriver.Chrome()
-        for i in self.search_urls:
-            self.driver.get(i)
+        for self.query_item in self.search_urls:
+            self.driver.get(self.query_item)
             self.current_html = self.driver.page_source
             element = self.driver.find_element_by_xpath('//*[@class="style-scope ytd-page-manager"]')
             actions = ActionChains(self.driver)
@@ -67,24 +67,27 @@ class YouTubeSearchScraper(object):
                 for j in range(100):
                     actions.send_keys(Keys.PAGE_DOWN)
                 actions.perform()
-                sleep(2)
+                sleep(2.3)
                 html = self.driver.page_source
                 if self.current_html != html:
                     self.current_html=html
-                    t = 0
-                    start = time.time()
-                    t = time.time() - start
-                    t == 10000
+                    # t = 0
+                    # start = time.time()
+                    # t = time.time() - start
+                    # t == 10
+                    # self.parse_search_videos()
+                    # self.search_data_save_as_csv_file()
+                    # self.channel_list_add_as_csv_file()
+                    # break
+                else:
                     self.parse_search_videos()
                     self.search_data_save_as_csv_file()
                     self.channel_list_add_as_csv_file()
                     break
-                # else:
-
-                #     break
 
 
     def parse_search_videos(self):
+        self.turn_ids = []
         self.titles = []
         self.video_urls = []
         self.views = []
@@ -96,6 +99,7 @@ class YouTubeSearchScraper(object):
         self.scrape_ats = []
         self.channel_countries = []
         self.channel_subscribers = []
+        turn_id = 0
         soup = BeautifulSoup(self.current_html, 'html.parser')
         for i in soup.find_all("div", id = "dismissable"):
             '''
@@ -116,7 +120,10 @@ class YouTubeSearchScraper(object):
             view_i = re.findall('<yt-formatted-string aria-label=".* 回視聴" class="style-scope ytd-video-renderer">', str(i))
             view_i_str = ",".join(view_i)
             view_i_str_replace = view_i_str.replace('<yt-formatted-string aria-label="', '').replace('前 ', '').replace(' 回視聴" class="style-scope ytd-video-renderer">', '').replace(',', '')
-            view_i_str_replace_int = [int(s) for s in view_i_str_replace.split() if s.isdigit()]
+            try:
+                view_i_str_replace_int = [int(s) for s in view_i_str_replace.split() if s.isdigit()]
+            except ValueError:
+                continue
             if view_i_str_replace_int:
                 view = (view_i_str_replace_int[-1])
             else:
@@ -148,7 +155,7 @@ class YouTubeSearchScraper(object):
             create_stamp_i_str = ",".join(create_stamp_i)
             create_stamp = create_stamp_i_str.replace('<span class="style-scope ytd-video-meta-block">', '').replace('前</span>', '')
             '''
-            NoneExclusion
+            Validation
             '''
             if title is None:
                 continue
@@ -164,11 +171,16 @@ class YouTubeSearchScraper(object):
                 continue
             elif video_length is None:
                 continue
-            queriy = self.search_query
+            elif "," in channel_url:
+                continue
+            turn_id += 1
+            queriy_material = self.query_item
+            queriy = queriy_material.replace('https://www.youtube.com/results?search_query=', '')
             scrape_at = self.scrape_at
             channel_country = None
             channel_subscriber = None
             if "/watch?v=" in video_url:
+                self.turn_ids.append(turn_id)
                 self.titles.append(title)
                 self.video_urls.append(video_url)
                 self.views.append(view)
@@ -184,6 +196,7 @@ class YouTubeSearchScraper(object):
 
     def search_data_save_as_csv_file(self):
         data = {
+         "turn_id": self.turn_ids,
          "title": self.titles,
          "video_url": self.video_urls,
          "view": self.views,
@@ -195,11 +208,22 @@ class YouTubeSearchScraper(object):
          "scrape_at": self.scrape_ats
         }
         if 0 is os.path.getsize(self.search_csv_data_file_path):
-            print(self.search_csv_data_file_path+"新規作成")
+            print(self.search_csv_data_file_path+"新規入力")
             pd.DataFrame(data).to_csv(self.search_csv_data_file_path,index=False)
         else:
             print(self.search_csv_data_file_path+"に追記")
-            pd.DataFrame(data).to_csv(self.search_csv_data_file_path, mode='a', header=False, index=False)
+            try:
+                pd.DataFrame(data).to_csv(self.search_csv_data_file_path, mode='a', header=False, index=False)
+            except ValueError:
+                print(len(self.turn_ids))
+                print(len(self.titles))
+                print(len(self.video_urls))
+                print(len(self.views))
+                print(len(self.channel_urls))
+                print(len(self.video_lengths))
+                print(len(self.create_stamps))
+                print(len(self.queries))
+                print(len(self.scrape_ats))
 
 
     def channel_list_add_as_csv_file(self):
@@ -211,11 +235,14 @@ class YouTubeSearchScraper(object):
          "channel_subscriber": self.channel_subscribers
         }
         if 0 is os.path.getsize(self.channel_list_csv_file_path):
-            print(self.channel_list_csv_file_path+"新規作成")
+            print(self.channel_list_csv_file_path+"新規入力")
             pd.DataFrame(data).to_csv(self.channel_list_csv_file_path,index=False)
         else:
             print(self.channel_list_csv_file_path+"に追記")
             pd.DataFrame(data).to_csv(self.channel_list_csv_file_path, mode='a', header=False, index=False)
+
+
+
 
 
     def csv_file_drop_duplicate(self):

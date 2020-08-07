@@ -115,7 +115,7 @@ class ChannelCountryAndScraper(object):
             '''
             channel_subscriber = channel_subscriber_material
             '''
-            NoneExclusion
+            Validation
             '''
             if "<!--css-build:shady-->" in str(country):
                 country = None

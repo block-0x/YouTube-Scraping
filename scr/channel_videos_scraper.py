@@ -20,41 +20,12 @@ class YoutubeChannelVideoScraper(object):
 
     def __init__(self):
         self.channel_videos_urls = []
-        '''
-        youtube_url
-        '''
-        # self.youtube_url = "https://www.youtube.com"
-        # self.user_name = "EGA-CHANNEL1"
-        # self.channel_videos_url = os.path.join(self.youtube_url, 'c', self.user_name, 'videos')
-        '''
-        csv_file_path
-        '''
-        # self.csv_file_name = "data/youtube_channel_raw_data"
-        # self.csv_file_path = os.path.join(os.getcwd(), self.csv_file_name+'.csv')
-        '''
-        extraction_data
-        '''
         self.channel_videos_urls = []
-        # self.titles = []
-        # self.video_urls = []
-        # self.views = []
-        # self.channel_names = []
-        # self.channel_subscribers = []
-        # self.create_stamps = []
-        # self.mean_views = []
-        # self.mean_comparisons = []
-
 
     def run(self):
         self.new_dir()
         self.read_channel_urls()
         self.get_page_source()
-        # self.parse_video_title_and_url_and_view()
-        # self.new_csv_file()
-        # self.save_as_csv_file()
-        # self.mean_view()
-        # self.mean_comparison()
-        # self.add_as_csv_file()
         self.driver.close()
 
 
@@ -96,14 +67,6 @@ class YoutubeChannelVideoScraper(object):
                 html = self.driver.page_source
                 if self.current_html != html:
                     self.current_html=html
-                    '''
-                    開発時に使用
-                    '''
-                    # t = 0
-                    # start = time.time()
-                    # t = time.time() - start
-                    # t == 20
-                    # break
                 else:
                     self.parse_video_title_and_url_and_view()
                     self.new_csv_file()
@@ -115,7 +78,6 @@ class YoutubeChannelVideoScraper(object):
 
 
     def parse_video_title_and_url_and_view(self):
-        # self.channel_videos_urls = []
         self.titles = []
         self.video_urls = []
         self.views = []
@@ -139,9 +101,7 @@ class YoutubeChannelVideoScraper(object):
         if "万" in channel_subscriber_rstrip:
             print(channel_subscriber_rstrip)
             channel_subscriber_replace = channel_subscriber_rstrip.replace(' ', '')
-            # print(channel_subscriber_replace)
             if "." in channel_subscriber_rstrip:
-                # print(channel_subscriber_replace)
                 channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
                 print(channel_subscriber_sub)
                 channel_subscriber_add_million = channel_subscriber_sub + '00'
@@ -158,16 +118,12 @@ class YoutubeChannelVideoScraper(object):
             channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
             channel_subscriber_material = int(channel_subscriber_sub)
         for i in soup.find_all("a"):
-            # title
             title = (i.get("title"))
-            # url
             url = (i.get("href"))
-            # view
             view_material_i = (i.get("aria-label"))
-            # create_stamp
             create_stamp_material_i = (i.get("aria-label"))
             '''
-            NoneExclusion
+            Validation
             '''
             if title is None:
                 continue
@@ -204,7 +160,6 @@ class YoutubeChannelVideoScraper(object):
             create_stamp_replace_x = create_stamp_str.replace(channel_name, '')
             create_stamp_replace_x_x = create_stamp_replace_x.replace(' ', '')
             create_stamp = create_stamp_replace_x_x
-            # print(view)
             if "/watch?v=" in url:
                 self.titles.append(title)
                 self.video_urls.append(url)
