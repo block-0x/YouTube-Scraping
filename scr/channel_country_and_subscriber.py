@@ -47,7 +47,7 @@ class ChannelCountryAndScraper(object):
 
 
     def get_page_source(self):
-        self.driver = webdriver.Chrome()
+        self.driver = webdriver.Firefox()
         for i in self.channel_about_urls:
             self.driver.get(i)
             self.current_html = self.driver.page_source

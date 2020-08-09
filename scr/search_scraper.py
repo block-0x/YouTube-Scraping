@@ -54,7 +54,7 @@ class YouTubeSearchScraper(object):
 
 
     def get_page_source(self):
-        self.driver = webdriver.Chrome()
+        self.driver = webdriver.Firefox()
         for self.query_item in self.search_urls:
             self.driver.get(self.query_item)
             self.current_html = self.driver.page_source
@@ -71,19 +71,19 @@ class YouTubeSearchScraper(object):
                 html = self.driver.page_source
                 if self.current_html != html:
                     self.current_html=html
-                    # t = 0
-                    # start = time.time()
-                    # t = time.time() - start
-                    # t == 10
-                    # self.parse_search_videos()
-                    # self.search_data_save_as_csv_file()
-                    # self.channel_list_add_as_csv_file()
-                    # break
-                else:
+                    t = 0
+                    start = time.time()
+                    t = time.time() - start
+                    t == 10
                     self.parse_search_videos()
                     self.search_data_save_as_csv_file()
                     self.channel_list_add_as_csv_file()
                     break
+                # else:
+                #     self.parse_search_videos()
+                #     self.search_data_save_as_csv_file()
+                #     self.channel_list_add_as_csv_file()
+                #     break
 
 
     def parse_search_videos(self):
@@ -99,6 +99,7 @@ class YouTubeSearchScraper(object):
         self.scrape_ats = []
         self.channel_countries = []
         self.channel_subscribers = []
+        self.mean_views = []
         turn_id = 0
         soup = BeautifulSoup(self.current_html, 'html.parser')
         for i in soup.find_all("div", id = "dismissable"):
@@ -179,6 +180,7 @@ class YouTubeSearchScraper(object):
             scrape_at = self.scrape_at
             channel_country = None
             channel_subscriber = None
+            mean_view = None
             if "/watch?v=" in video_url:
                 self.turn_ids.append(turn_id)
                 self.titles.append(title)
@@ -192,6 +194,7 @@ class YouTubeSearchScraper(object):
                 self.scrape_ats.append(scrape_at)
                 self.channel_countries.append(channel_country)
                 self.channel_subscribers.append(channel_subscriber)
+                self.mean_views.append(mean_view)
 
 
     def search_data_save_as_csv_file(self):
@@ -205,7 +208,10 @@ class YouTubeSearchScraper(object):
          "video_length": self.video_lengths,
          "create_stamp": self.create_stamps,
          "queriy": self.queries,
-         "scrape_at": self.scrape_ats
+         "scrape_at": self.scrape_ats,
+         "channel_country": self.channel_countries,
+         "channel_subscriber": self.channel_subscribers,
+         "mean_view": self.mean_views
         }
         if 0 is os.path.getsize(self.search_csv_data_file_path):
             print(self.search_csv_data_file_path+"新規入力")
@@ -242,7 +248,33 @@ class YouTubeSearchScraper(object):
             pd.DataFrame(data).to_csv(self.channel_list_csv_file_path, mode='a', header=False, index=False)
 
 
+    def csv_file_duplicate_count(self):
+        df = pd.read_csv(self.channel_list_csv_file_path)
+        self.df_update = df[df['channel_subscriber'].isnull()]
+        channel_url_data = self.df_update.set_index('channel_url')
+        channel_urls_ndarray = channel_url_data.index.values
+        channel_urls = channel_urls_ndarray.tolist()
+        for i in channel_urls:
+            youtube_url = 'https://www.youtube.com'
+            self.channel_url = ('%s' % i)
+            channel_about_url = urlparse.urljoin(youtube_url, self.channel_url+'/about')
+            self.channel_about_urls.append(channel_about_url)
 
+
+    # def csv_file_duplicate_count(self):
+    #     df = pd.read_csv(self.channel_list_csv_file_path)
+    #     df.loc[self.scrape_at]
+    #     self.df_scrape_at_filter = df[df.duplicated(subset='video_url', keep=False, inplace=True)]
+    #     print(self.df_scrape_at_filter)
+    #     channel_url_data = self.df_scrape_at_filter.set_index('video_url')
+    #     df.replace({'age': {24: 100, 18: 0}, 'point': {None: カウントした}})
+    #     channel_urls_ndarray = channel_url_data.index.values
+    #     channel_urls = channel_urls_ndarray.tolist()
+    #     for i in channel_urls:
+    #         youtube_url = 'https://www.youtube.com'
+    #         self.channel_url = ('%s' % i)
+    #         channel_about_url = urlparse.urljoin(youtube_url, self.channel_url+'/about')
+    #         self.channel_about_urls.append(channel_about_url)
 
 
     def csv_file_drop_duplicate(self):
