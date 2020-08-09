@@ -14,7 +14,10 @@ try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
+import socks, socket
 
+socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5, '127.0.0.1', 9050)
+socket.socket = socks.socksocket
 
 class YoutubeChannelVideoScraper(object):
 
@@ -50,7 +53,7 @@ class YoutubeChannelVideoScraper(object):
 
 
     def get_page_source(self):
-        self.driver = webdriver.Chrome()
+        self.driver = webdriver.Firefox()
         for i in self.channel_videos_urls:
             self.driver.get(i)
             self.current_html = self.driver.page_source
