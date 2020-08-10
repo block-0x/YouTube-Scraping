@@ -13,7 +13,14 @@ try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
+import requests
+'''
+proxy
+'''
+import socks, socket
 
+socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5, '127.0.0.1', 9050)
+socket.socket = socks.socksocket
 
 class ChannelCountryAndScraper(object):
 
@@ -29,37 +36,36 @@ class ChannelCountryAndScraper(object):
 
     def run(self):
         self.copy_csv()
-        self.get_page_source()
-        self.channel_country_subscriber_add_as_csv_file()
-        self.csv_file_drop_duplicate()
-        self.driver.close()
+        # self.get_page_source()
+        # self.channel_country_subscriber_add_as_csv_file()
+        # self.csv_file_drop_duplicate()
+        # self.driver.close()
 
 
     def copy_csv(self):
         df = pd.read_csv(self.channel_list_csv_file_path)
-        self.df = pd.DataFrame(df).to_csv(self.scarch_videos_list_csv_file_path,index=False)
-        csv_file_drop_duplicate()
+        pd.DataFrame(df).to_csv(self.scarch_videos_list_csv_file_path,index=False)
+        print(self.scarch_videos_list_csv_file_path+"にコピーしました")
+        self.csv_file_drop_duplicate()
 
 
     def csv_file_drop_duplicate(self):
-        self.df = pd.read_csv(self.scarch_videos_list_csv_file_path)
+        df = pd.read_csv(self.scarch_videos_list_csv_file_path)
         df_drop_duplicate = df.drop_duplicates(subset='video_url', keep='last')
-        self.df_drop_duplicate = pd.DataFrame(df_drop_duplicate).to_csv(self.scarch_videos_list_csv_file_path,index=False, mode='a')
+        self.df_add_csv = pd.DataFrame(df_drop_duplicate).to_csv(self.scarch_videos_list_csv_file_path,index=False)
         print(self.scarch_videos_list_csv_file_path+"重複動画削除")
-        read_csv_urls()
+        self.read_csv_urls()
 
 
     def read_csv_urls(self):
-            # df = pd.read_csv(self.scarch_videos_list_csv_file_path)
-            self.df_drop_duplicate = df[df['video_url'].isnull()]
-            video_url_data = self.df_update.set_index('channel_url')
-            # channel_urls_ndarray = channel_url_data.index.values
-            # channel_urls = channel_urls_ndarray.tolist()
-            for i in video_url_data:
+            df = pd.read_csv(self.scarch_videos_list_csv_file_path,index_col='video_url')
+            video_url_data = df.index.values
+            video_urls = video_url_data.tolist()
+            for i in video_urls:
                 youtube_url = 'https://www.youtube.com'
                 self.video_url = ('%s' % i)
-                video_page_url = urlparse.urljoin(youtube_url, self.video_url)
-                self.video_urls.append(video_page_url)
+                video_url_path = urlparse.urljoin(youtube_url, self.video_url)
+                self.video_urls.append(video_url_path)
 
 
     def get_page_source(self):
@@ -171,7 +177,7 @@ class ChannelCountryAndScraper(object):
         print(self.channel_list_csv_file_path+"国・登録者追記")
 
 
-    def csv_file_drop_duplicate(self):
+    # def csv_file_drop_duplicate(self):
         df = pd.read_csv(self.channel_list_csv_file_path)
         df_drop_duplicate = df[df['channel_subscriber'].notnull()]
         pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
