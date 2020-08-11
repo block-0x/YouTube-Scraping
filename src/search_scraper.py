@@ -71,19 +71,19 @@ class YouTubeSearchScraper(object):
                 html = self.driver.page_source
                 if self.current_html != html:
                     self.current_html=html
-                    # t = 0
-                    # start = time.time()
-                    # t = time.time() - start
-                    # t == 10
-                    # self.parse_search_videos()
-                    # self.search_data_save_as_csv_file()
-                    # self.channel_list_add_as_csv_file()
-                    # break
-                else:
+                    t = 0
+                    start = time.time()
+                    t = time.time() - start
+                    t == 10
                     self.parse_search_videos()
                     self.search_data_save_as_csv_file()
                     self.channel_list_add_as_csv_file()
                     break
+                # else:
+                #     self.parse_search_videos()
+                #     self.search_data_save_as_csv_file()
+                #     self.channel_list_add_as_csv_file()
+                #     break
 
 
     def parse_search_videos(self):
