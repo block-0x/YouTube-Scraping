@@ -40,7 +40,7 @@ class ChannelCountryAndScraper(object):
         self.csv_file_drop_duplicate()
         self.read_csv_urls()
         self.get_page_source()
-        self.parse_video_show()
+        # self.parse_video_show()
         # self.csv_file_drop_duplicate()
         # self.driver.close()
 
@@ -74,35 +74,80 @@ class ChannelCountryAndScraper(object):
             html = requests.get('http://localhost:8050/render.html',
             params={'url': i, 'wait': 0.5})
             self.soup = BeautifulSoup(html.text, "html.parser")
-            print(self.soup)
+            self.parse_view_and_createAt()
+            self.parse_video_tags()
+            self.parse_video_description()
+            self.parse_video_like()
 
 
-    def parse_video_show(self):
-        for i in self.soup.find_all("div", class_="style-scope ytd-video-primary-info-renderer"):
-            print(i)
-            # country_i_findall = re.findall('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">.*</yt-formatted-string>', str(i))
-            # country_i_replace = str(country_i_findall).replace('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">', '').replace('</yt-formatted-string>', '')
-            # country = str(country_i_replace).replace("['", '').replace("']", '')
-            # '''
-            # channelSubscriberOfIntExtractionFunction
-            # '''
-            # channel_subscriber = channel_subscriber_material
-            # '''
-            # Validation
-            # '''
-            # if "<!--css-build:shady-->" in str(country):
-            #     country = None
-            # if "<" in str(country):
-            #     country = None
-            # if "[]" in str(country):
-            #     country = None
-            # self.channel_countries.append(country)
-            # self.channel_subscribers.append(channel_subscriber)
+
+    def parse_view_and_createAt(self):
+        self.views = []
+        self.create_ats = []
+        for i in self.soup.find_all('div', {"class" : "style-scope ytd-video-primary-info-renderer"}):
+            view_i = re.findall('</ytd-badge-supported-renderer><div class="style-scope ytd-video-primary-info-renderer" id="info"><div class="style-scope ytd-video-primary-info-renderer" id="info-text"><div class="style-scope ytd-video-primary-info-renderer" id="count"><yt-view-count-renderer class="style-scope ytd-video-primary-info-renderer" small_=""><!--css-build:shady--><span class="view-count style-scope yt-view-count-renderer">.*</span><span class="short-view-count style-scope yt-view-count-renderer">', str(i))
+            view_i_join = ",".join(view_i)
+            view_i_join_replace = str(view_i_join).replace('</ytd-badge-supported-renderer><div class="style-scope ytd-video-primary-info-renderer" id="info"><div class="style-scope ytd-video-primary-info-renderer" id="info-text"><div class="style-scope ytd-video-primary-info-renderer" id="count"><yt-view-count-renderer class="style-scope ytd-video-primary-info-renderer" small_=""><!--css-build:shady--><span class="view-count style-scope yt-view-count-renderer">', '').replace(' views</span><span class="short-view-count style-scope yt-view-count-renderer">', '')
+            view = view_i_join_replace.replace(',', '')
+            create_at_i = re.findall('views</span></yt-view-count-renderer></div><div class="style-scope ytd-video-primary-info-renderer" id="date"><span class="style-scope ytd-video-primary-info-renderer" id="dot">•</span><yt-formatted-string class="style-scope ytd-video-primary-info-renderer">.*</yt-formatted-string>', str(i))
+            create_at_i_join = ",".join(create_at_i)
+            create_at = create_at_i_join.replace('views</span></yt-view-count-renderer></div><div class="style-scope ytd-video-primary-info-renderer" id="date"><span class="style-scope ytd-video-primary-info-renderer" id="dot">•</span><yt-formatted-string class="style-scope ytd-video-primary-info-renderer">', '').replace('</yt-formatted-string>', '')
+            if view is None:
+                continue
+            if create_at is None:
+                continue
+            if not view == '':
+                self.views.append(view)
+                self.create_ats.append(create_at)
+                print('parse_view_and_createAt complete')
 
 
-    # def parse_tags(self):
-    #     for i in self.soup.re.findall('<meta content="YouTube" property="og:site_name"/>.*<div class="skeleton flexy" id="player">'):
+    def parse_video_tags(self):
+        self.tags = []
+        for i in self.soup.find_all('meta'):
+            tag_i = re.findall('<meta content.*property="og:video:tag"/>', str(i))
+            tag_i_join = ",".join(tag_i)
+            tag = tag_i_join.replace('<meta content="', '').replace('" property="og:video:tag"/>', '')
+            if tag is None:
+                continue
+            if not tag == '':
+                self.tags.append(tag)
+                print('tag complete')
 
+
+    def parse_video_description(self):
+        self.descriptions = []
+        for i in self.soup.find_all('meta'):
+            description_i = re.findall('<meta content.*property="og:description"/>', str(i))
+            description_i_join = ",".join(description_i)
+            description = description_i_join.replace('<meta content="', '').replace('" property="og:description"/>', '')
+            if description is None:
+                continue
+            if not description == '':
+                self.descriptions.append(description)
+                print('description complete')
+
+
+    def parse_video_like(self):
+        self.likes = []
+        self.dislikes = []
+        for i in self.soup.find_all('yt-formatted-string'):
+            like_i = re.findall('aria-label.* likes', str(i))
+            like_i_join = ",".join(like_i)
+            like = like_i_join.replace('aria-label="', '').replace(' likes', '')
+            dislike_i = re.findall('aria-label.*dislikes', str(i))
+            dislike_i_join = ",".join(dislike_i)
+            dislike = dislike_i_join.replace('aria-label="', '').replace(' dislikes', '')
+            if like is None:
+                continue
+            if dislike is None:
+                continue
+            if not like == '':
+                self.likes.append(like)
+                print('like complete')
+            if not dislike == '':
+                self.dislikes.append(dislike)
+                print('dislike complete')
 
 
     def country_nihongo_true(self):
