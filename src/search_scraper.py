@@ -105,6 +105,11 @@ class YouTubeSearchScraper(object):
         self.descriptions = []
         self.likes = []
         self.dislikes = []
+        self.channel_create_ats = []
+        self.all_video_views = []
+        self.instagrams = []
+        self.twitters = []
+        self.blogs = []
         turn_id = 0
         soup = BeautifulSoup(self.current_html, 'html.parser')
         for i in soup.find_all("div", id = "dismissable"):
@@ -191,6 +196,11 @@ class YouTubeSearchScraper(object):
             description = None
             like = None
             dislike = None
+            channel_create_at = None
+            all_video_view = None
+            instagram = None
+            twitter = None
+            blog = None
             if "/watch?v=" in video_url:
                 self.turn_ids.append(turn_id)
                 self.titles.append(title)
@@ -210,6 +220,11 @@ class YouTubeSearchScraper(object):
                 self.descriptions.append(description)
                 self.likes.append(like)
                 self.dislikes.append(dislike)
+                self.channel_create_ats.append(channel_create_at)
+                self.all_video_views.append(all_video_view)
+                self.instagrams.append(instagram)
+                self.twitters.append(twitter)
+                self.blogs.append(blog)
 
 
     def search_data_save_as_csv_file(self):
@@ -234,12 +249,12 @@ class YouTubeSearchScraper(object):
          "dislike": self.dislikes
         }
         if 0 is os.path.getsize(self.search_csv_data_file_path):
-            print(self.search_csv_data_file_path+"新規入力")
             pd.DataFrame(data).to_csv(self.search_csv_data_file_path,index=False)
+            print(self.search_csv_data_file_path+"新規入力")
         else:
-            print(self.search_csv_data_file_path+"に追記")
             try:
                 pd.DataFrame(data).to_csv(self.search_csv_data_file_path, mode='a', header=False, index=False)
+                print(self.search_csv_data_file_path+"に追記")
             except ValueError:
                 print(len(self.turn_ids))
                 print(len(self.titles))
@@ -258,14 +273,33 @@ class YouTubeSearchScraper(object):
          "channel_name": self.channel_names,
          "scrape_at": self.scrape_ats,
          "channel_country": self.channel_countries,
-         "channel_subscriber": self.channel_subscribers
+         "channel_subscriber": self.channel_subscribers,
+         "mean_view": self.mean_views,
+         "channel_create_at": self.channel_create_ats,
+         "all_video_views": self.all_video_views,
+         "instagram": self.instagrams,
+         "twitter": self.twitters,
+         "blog": self.blogs
         }
         if 0 is os.path.getsize(self.channel_list_csv_file_path):
-            print(self.channel_list_csv_file_path+"新規入力")
-            pd.DataFrame(data).to_csv(self.channel_list_csv_file_path,index=False)
+            try:
+                pd.DataFrame(data).to_csv(self.channel_list_csv_file_path,index=False)
+                print(self.channel_list_csv_file_path+"新規入力")
+            except ValueError:
+                print(len(self.channel_urls))
+                print(len(self.channel_names))
+                print(len(self.scrape_ats))
+                print(len(self.channel_countries))
+                print(len(self.channel_subscribers))
+                print(len(self.mean_views))
+                print(len(self.channel_create_ats))
+                print(len(self.all_video_views))
+                print(len(self.instagrams))
+                print(len(self.twitters))
+                print(len(self.blogs))
         else:
-            print(self.channel_list_csv_file_path+"に追記")
             pd.DataFrame(data).to_csv(self.channel_list_csv_file_path, mode='a', header=False, index=False)
+            print(self.channel_list_csv_file_path+"に追記")
 
 
     def csv_file_duplicate_count(self):
