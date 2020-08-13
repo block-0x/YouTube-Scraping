@@ -14,6 +14,9 @@ try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
+# import sys
+# sys.path.append(os.path.channel_country_and_subscriberpath(".."))
+# from . import channel_country_and_subscriber
 # import socks, socket
 
 # socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5, '127.0.0.1', 9050)
@@ -23,7 +26,7 @@ class YoutubeChannelVideoScraper(object):
 
     def __init__(self):
         self.channel_videos_urls = []
-        self.channel_videos_urls = []
+
 
     def run(self):
         self.new_dir()
@@ -37,7 +40,7 @@ class YoutubeChannelVideoScraper(object):
         dt_now = datetime.datetime.now()
         hour = dt_now.hour
         minute = dt_now.minute
-        self.new_dir_path = os.path.join('./../data/channel/channel_videos/'+str(today)+'-'+str(hour)+':'+str(minute)+'channel_videos')
+        self.new_dir_path = os.path.join('./../data/channel_videos/'+str(today)+'-'+str(hour)+':'+str(minute)+'channel_videos')
         os.mkdir(self.new_dir_path)
 
 
@@ -74,18 +77,24 @@ class YoutubeChannelVideoScraper(object):
                     start = time.time()
                     t = time.time() - start
                     t == 10
+                    self.parse_videos_title_and_url_and_view()
+                    self.new_csv_file()
+                    self.save_as_csv_file()
+                    self.mean_view_function()
+                    self.mean_comparison_function()
+                    self.add_as_csv_file()
                     break
                 # else:
-                #     self.parse_video_title_and_url_and_view()
-                #     self.new_csv_file()
-                #     self.save_as_csv_file()
-                #     self.mean_view_function()
-                #     self.mean_comparison_function()
-                #     self.add_as_csv_file()
+                    # self.parse_videos_title_and_url_and_view()
+                    # self.new_csv_file()
+                    # self.save_as_csv_file()
+                    # self.mean_view_function()
+                    # self.mean_comparison_function()
+                    # self.add_as_csv_file()
                 #     break
 
 
-    def parse_video_title_and_url_and_view(self):
+    def parse_videos_title_and_url_and_view(self):
         self.titles = []
         self.video_urls = []
         self.views = []
@@ -176,7 +185,7 @@ class YoutubeChannelVideoScraper(object):
                 except UnboundLocalError:
                     view = None
                     self.views.append(view)
-                    print("parse_video_title_and_url_and_viewエラー")
+                    print("parse_videos_title_and_url_and_viewエラー")
                     pass
                 self.channel_names.append(channel_name)
                 self.channel_subscribers.append(channel_subscriber)
@@ -206,6 +215,25 @@ class YoutubeChannelVideoScraper(object):
 
 
     def mean_view_function(self):
+        self.mean_views = []
+        if None in self.views:
+            pass
+        df = pd.read_csv(self.new_csv_file_path)
+        try:
+            views = self.views
+            s = sum(views)
+            N = len(views)
+            mean_view_material = s / N
+            self.mean_view = round(mean_view_material)
+            for i in views:
+                self.mean_views.append(self.mean_view)
+        except ValueError:
+            print('mean_view_function: ValueError')
+        except TypeError:
+            print('mean_view_function: TypeError')
+
+
+    def add_mean_view(self):
         self.mean_views = []
         if None in self.views:
             pass

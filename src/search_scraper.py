@@ -31,7 +31,7 @@ class YouTubeSearchScraper(object):
         '''
         scrape_at_stmp
         '''
-        self.scrape_at = datetime.date.today()
+        self.scrape_at = datetime.date.today().strftime("%Y/%m/%d")
 
 
     def run(self):

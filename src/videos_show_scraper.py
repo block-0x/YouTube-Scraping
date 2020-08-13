@@ -50,7 +50,6 @@ class ChannelCountryAndScraper(object):
         self.csv_file_drop_duplicate()
 
 
-
     def copy_csv(self):
         df = pd.read_csv(self.channel_list_csv_file_path)
         pd.DataFrame(df).to_csv(self.scarch_videos_list_csv_file_path,index=False)
