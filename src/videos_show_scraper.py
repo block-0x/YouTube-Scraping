@@ -128,11 +128,14 @@ class ChannelCountryAndScraper(object):
 
 
     def only_last_tags(self):
-        print('last_tag')
         tags_i = self.tags
-        tags = ','.join(tags_i)
-        self.tag_str.append(tags)
-        print(self.tag_str)
+        if tags_i is None:
+            tags = None
+            self.tag_str.append(tags)
+        else:
+            tags = ','.join(tags_i)
+            self.tag_str.append(tags)
+            print(self.tag_str)
 
 
     def parse_video_description(self):
