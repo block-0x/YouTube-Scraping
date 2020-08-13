@@ -21,7 +21,7 @@ class ChannelCountryAndScraper(object):
         self.channel_about_urls = []
         self.nihongo_channel_countries = []
         self.channel_subscribers_true = []
-        self.channel_list_csv_file_name = "./../data/youtube_channel_list"
+        self.channel_list_csv_file_name = "./../data/channel/youtube_channel_list"
         self.channel_list_csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
 
 
