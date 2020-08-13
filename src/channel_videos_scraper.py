@@ -14,10 +14,10 @@ try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
-import socks, socket
+# import socks, socket
 
-socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5, '127.0.0.1', 9050)
-socket.socket = socks.socksocket
+# socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5, '127.0.0.1', 9050)
+# socket.socket = socks.socksocket
 
 class YoutubeChannelVideoScraper(object):
 
@@ -70,14 +70,19 @@ class YoutubeChannelVideoScraper(object):
                 html = self.driver.page_source
                 if self.current_html != html:
                     self.current_html=html
-                else:
-                    self.parse_video_title_and_url_and_view()
-                    self.new_csv_file()
-                    self.save_as_csv_file()
-                    self.mean_view_function()
-                    self.mean_comparison_function()
-                    self.add_as_csv_file()
+                    t = 0
+                    start = time.time()
+                    t = time.time() - start
+                    t == 10
                     break
+                # else:
+                #     self.parse_video_title_and_url_and_view()
+                #     self.new_csv_file()
+                #     self.save_as_csv_file()
+                #     self.mean_view_function()
+                #     self.mean_comparison_function()
+                #     self.add_as_csv_file()
+                #     break
 
 
     def parse_video_title_and_url_and_view(self):
