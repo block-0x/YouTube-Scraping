@@ -187,13 +187,6 @@ class ChannelCountryAndScraper(object):
         df_add = pd.DataFrame(df).to_csv(self.scarch_videos_list_csv_file_path, mode='a', header=False,index=False)
 
 
-    # def csv_file_drop_duplicate(self):
-    #     df = pd.read_csv(self.channel_list_csv_file_path)
-    #     df_drop_duplicate = df.drop_duplicates(subset='video_url', keep='last')
-    #     df_add_csv = pd.DataFrame(df_drop_duplicate).to_csv(self.scarch_videos_list_csv_file_path,index=False)
-    #     print(self.channel_list_csv_file_path+"重複削除")
-
-
 if __name__ == "__main__":
     channel_country = ChannelCountryAndScraper()
     channel_country.run()

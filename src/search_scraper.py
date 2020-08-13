@@ -100,6 +100,11 @@ class YouTubeSearchScraper(object):
         self.channel_countries = []
         self.channel_subscribers = []
         self.mean_views = []
+        self.create_ats = []
+        self.tags = []
+        self.descriptions = []
+        self.likes = []
+        self.dislikes = []
         turn_id = 0
         soup = BeautifulSoup(self.current_html, 'html.parser')
         for i in soup.find_all("div", id = "dismissable"):
@@ -181,6 +186,11 @@ class YouTubeSearchScraper(object):
             channel_country = None
             channel_subscriber = None
             mean_view = None
+            create_at = None
+            tag = None
+            description = None
+            like = None
+            dislike = None
             if "/watch?v=" in video_url:
                 self.turn_ids.append(turn_id)
                 self.titles.append(title)
@@ -195,6 +205,11 @@ class YouTubeSearchScraper(object):
                 self.channel_countries.append(channel_country)
                 self.channel_subscribers.append(channel_subscriber)
                 self.mean_views.append(mean_view)
+                self.create_ats.append(create_at)
+                self.tags.append(tag)
+                self.descriptions.append(description)
+                self.likes.append(like)
+                self.dislikes.append(dislike)
 
 
     def search_data_save_as_csv_file(self):
@@ -211,7 +226,12 @@ class YouTubeSearchScraper(object):
          "scrape_at": self.scrape_ats,
          "channel_country": self.channel_countries,
          "channel_subscriber": self.channel_subscribers,
-         "mean_view": self.mean_views
+         "mean_view": self.mean_views,
+         "create_at": self.create_ats,
+         "tag": self.tags,
+         "description": self.descriptions,
+         "like": self.likes,
+         "dislike": self.dislikes
         }
         if 0 is os.path.getsize(self.search_csv_data_file_path):
             print(self.search_csv_data_file_path+"新規入力")
