@@ -29,6 +29,12 @@ class ChannelCountryAndScraper(object):
         self.video_urls = []
         self.nihongo_channel_countries = []
         self.channel_subscribers_true = []
+        self.views = []
+        self.create_ats = []
+        self.tag_str = []
+        self.descriptions = []
+        self.likes = []
+        self.dislikes = []
         self.channel_list_csv_file_name = "./../data/youtube_search_csv_data"
         self.channel_list_csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
         self.scarch_videos_list_csv_file_name = "./../data/scarch_videos_list_scv"
@@ -40,9 +46,9 @@ class ChannelCountryAndScraper(object):
         self.csv_file_drop_duplicate()
         self.read_csv_urls()
         self.get_page_source()
-        # self.parse_video_show()
-        # self.csv_file_drop_duplicate()
-        # self.driver.close()
+        self.add_as_csv_file()
+        self.csv_file_drop_duplicate()
+
 
 
     def copy_csv(self):
@@ -54,7 +60,7 @@ class ChannelCountryAndScraper(object):
     def csv_file_drop_duplicate(self):
         df = pd.read_csv(self.scarch_videos_list_csv_file_path)
         df_drop_duplicate = df.drop_duplicates(subset='video_url', keep='last')
-        self.df_add_csv = pd.DataFrame(df_drop_duplicate).to_csv(self.scarch_videos_list_csv_file_path,index=False)
+        df_add_csv = pd.DataFrame(df_drop_duplicate).to_csv(self.scarch_videos_list_csv_file_path,index=False)
         print(self.scarch_videos_list_csv_file_path+"重複動画削除")
 
 
@@ -71,19 +77,18 @@ class ChannelCountryAndScraper(object):
 
     def get_page_source(self):
         for i in self.video_urls:
+            print(i)
             html = requests.get('http://localhost:8050/render.html',
-            params={'url': i, 'wait': 0.5})
+            params={'url': i, 'wait': 2})
             self.soup = BeautifulSoup(html.text, "html.parser")
             self.parse_view_and_createAt()
             self.parse_video_tags()
             self.parse_video_description()
             self.parse_video_like()
-
+            self.only_last_tags()
 
 
     def parse_view_and_createAt(self):
-        self.views = []
-        self.create_ats = []
         for i in self.soup.find_all('div', {"class" : "style-scope ytd-video-primary-info-renderer"}):
             view_i = re.findall('</ytd-badge-supported-renderer><div class="style-scope ytd-video-primary-info-renderer" id="info"><div class="style-scope ytd-video-primary-info-renderer" id="info-text"><div class="style-scope ytd-video-primary-info-renderer" id="count"><yt-view-count-renderer class="style-scope ytd-video-primary-info-renderer" small_=""><!--css-build:shady--><span class="view-count style-scope yt-view-count-renderer">.*</span><span class="short-view-count style-scope yt-view-count-renderer">', str(i))
             view_i_join = ",".join(view_i)
@@ -91,15 +96,22 @@ class ChannelCountryAndScraper(object):
             view = view_i_join_replace.replace(',', '')
             create_at_i = re.findall('views</span></yt-view-count-renderer></div><div class="style-scope ytd-video-primary-info-renderer" id="date"><span class="style-scope ytd-video-primary-info-renderer" id="dot">•</span><yt-formatted-string class="style-scope ytd-video-primary-info-renderer">.*</yt-formatted-string>', str(i))
             create_at_i_join = ",".join(create_at_i)
-            create_at = create_at_i_join.replace('views</span></yt-view-count-renderer></div><div class="style-scope ytd-video-primary-info-renderer" id="date"><span class="style-scope ytd-video-primary-info-renderer" id="dot">•</span><yt-formatted-string class="style-scope ytd-video-primary-info-renderer">', '').replace('</yt-formatted-string>', '')
+            create_at_join_replace = create_at_i_join.replace('views</span></yt-view-count-renderer></div><div class="style-scope ytd-video-primary-info-renderer" id="date"><span class="style-scope ytd-video-primary-info-renderer" id="dot">•</span><yt-formatted-string class="style-scope ytd-video-primary-info-renderer">', '').replace('</yt-formatted-string>', '')
+            create_at_l = create_at_join_replace.replace(',', '')
             if view is None:
                 continue
-            if create_at is None:
+            if create_at_l is None:
                 continue
             if not view == '':
                 self.views.append(view)
+                create_at = str(create_at_l).replace("['", '').replace("']", '')
+                try:
+                    create_at = datetime.datetime.strptime(create_at, '%b %d %Y').strftime('%Y/%m/%d')
+                except ValueError:
+                    create_at = None
                 self.create_ats.append(create_at)
-                print('parse_view_and_createAt complete')
+                print(self.views)
+                print(self.create_ats)
 
 
     def parse_video_tags(self):
@@ -107,82 +119,76 @@ class ChannelCountryAndScraper(object):
         for i in self.soup.find_all('meta'):
             tag_i = re.findall('<meta content.*property="og:video:tag"/>', str(i))
             tag_i_join = ",".join(tag_i)
-            tag = tag_i_join.replace('<meta content="', '').replace('" property="og:video:tag"/>', '')
-            if tag is None:
+            tag_l = tag_i_join.replace('<meta content="', '').replace('" property="og:video:tag"/>', '')
+            if tag_l is None:
                 continue
-            if not tag == '':
+            if not tag_l == '':
+                tag = (tag_l).replace("['", '').replace("']", '')
                 self.tags.append(tag)
-                print('tag complete')
+
+
+    def only_last_tags(self):
+        print('last_tag')
+        tags_i = self.tags
+        tags = ','.join(tags_i)
+        self.tag_str.append(tags)
+        print(self.tag_str)
 
 
     def parse_video_description(self):
-        self.descriptions = []
         for i in self.soup.find_all('meta'):
             description_i = re.findall('<meta content.*property="og:description"/>', str(i))
             description_i_join = ",".join(description_i)
-            description = description_i_join.replace('<meta content="', '').replace('" property="og:description"/>', '')
-            if description is None:
+            description_l = description_i_join.replace('<meta content="', '').replace('" property="og:description"/>', '')
+            if description_l is None:
                 continue
-            if not description == '':
+            if not description_l == '':
+                description = (description_l).replace("['", '').replace("']", '')
                 self.descriptions.append(description)
-                print('description complete')
+                print(self.descriptions)
 
 
     def parse_video_like(self):
-        self.likes = []
-        self.dislikes = []
         for i in self.soup.find_all('yt-formatted-string'):
             like_i = re.findall('aria-label.* likes', str(i))
             like_i_join = ",".join(like_i)
-            like = like_i_join.replace('aria-label="', '').replace(' likes', '')
+            like_l = like_i_join.replace('aria-label="', '').replace(' likes', '').replace(',', '')
             dislike_i = re.findall('aria-label.*dislikes', str(i))
             dislike_i_join = ",".join(dislike_i)
-            dislike = dislike_i_join.replace('aria-label="', '').replace(' dislikes', '')
-            if like is None:
+            dislike_l = dislike_i_join.replace('aria-label="', '').replace(' dislikes', '').replace(',', '')
+            if like_l is None:
                 continue
-            if dislike is None:
+            if dislike_l is None:
                 continue
-            if not like == '':
+            if not like_l == '':
+                like = str(like_l).replace("['", '').replace("']", '')
                 self.likes.append(like)
-                print('like complete')
-            if not dislike == '':
-                self.dislikes.append(dislike)
-                print('dislike complete')
+                print(self.likes)
+            if not dislike_l == '':
+                like = str(like_l).replace("['", '').replace("']", '')
+                self.dislikes.append(dislike_l)
+                print(self.dislikes)
 
 
-    def country_nihongo_true(self):
-        country_list = self.channel_countries
-        country_list_join = ','.join(str(country_list))
-        country_list_join_replace = country_list_join.replace(',', '')
-        nihongo = regex.compile('[\u2E80-\u2FDF\u3005-\u3007\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\U00020000-\U0002EBEF]+')
-        country = (nihongo.findall(str(country_list_join_replace)))
-        if "[]" in str(country):
-            country = '非表示'
-        if "[" in str(country):
-            country = str(country).replace("['", '').replace("']", '')
-        self.nihongo_channel_countries.append(str(country))
-
-
-    def channel_subscriber_set(self):
-        subscriber_list =  self.channel_subscribers
-        subscriber = (list(set(subscriber_list)))
-        subscriber = str(subscriber).replace("[", '').replace("]", '')
-        self.channel_subscribers_true.append(subscriber)
-
-
-    def channel_country_subscriber_add_as_csv_file(self):
-        df = self.df_update
-        df['channel_country'] = self.nihongo_channel_countries
-        df['channel_subscriber'] = self.channel_subscribers_true
-        pd.DataFrame(df).to_csv(self.channel_list_csv_file_path, mode='a', header=False,index=False)
-        print(self.channel_list_csv_file_path+"国・登録者追記")
+    def add_as_csv_file(self):
+        df = pd.read_csv(self.scarch_videos_list_csv_file_path)
+        print(self.views)
+        df['view'] = self.views
+        print(self.create_ats)
+        df['create_at'] = self.create_ats
+        print(self.tag_str)
+        df['tag'] = self.tag_str
+        df['description'] = self.descriptions
+        df['like'] = self.likes
+        df['dislike'] = self.dislikes
+        df_add = pd.DataFrame(df).to_csv(self.scarch_videos_list_csv_file_path, mode='a', header=False,index=False)
 
 
     # def csv_file_drop_duplicate(self):
-        df = pd.read_csv(self.channel_list_csv_file_path)
-        df_drop_duplicate = df[df['channel_subscriber'].notnull()]
-        pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
-        print(self.channel_list_csv_file_path+"重複削除")
+    #     df = pd.read_csv(self.channel_list_csv_file_path)
+    #     df_drop_duplicate = df.drop_duplicates(subset='video_url', keep='last')
+    #     df_add_csv = pd.DataFrame(df_drop_duplicate).to_csv(self.scarch_videos_list_csv_file_path,index=False)
+    #     print(self.channel_list_csv_file_path+"重複削除")
 
 
 if __name__ == "__main__":
