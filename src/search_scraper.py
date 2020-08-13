@@ -20,8 +20,8 @@ class YouTubeSearchScraper(object):
         '''
         csv_file_path
         '''
-        self.search_data_csv_file_name = "./../data/youtube_search_csv_data"
-        self.channel_list_csv_file_name = "./../data/youtube_channel_list"
+        self.search_data_csv_file_name = "./../data/search/youtube_search_csv_data"
+        self.channel_list_csv_file_name = "./../data/channel/youtube_channel_list"
         self.search_csv_data_file_path = os.path.join(os.getcwd(), self.search_data_csv_file_name+'.csv')
         self.channel_list_csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
         '''
@@ -42,7 +42,7 @@ class YouTubeSearchScraper(object):
 
 
     def read_search_query(self):
-        search_query_csv = pd.read_csv('./../data/search_list.csv',index_col='search_query')
+        search_query_csv = pd.read_csv('./../data/search/search_list.csv',index_col='search_query')
         search_query_values = search_query_csv.index.values
         search_queries = search_query_values.tolist()
         for i in search_queries:
@@ -298,7 +298,7 @@ class YouTubeSearchScraper(object):
 
 
     def csv_file_drop_duplicate(self):
-        df = pd.read_csv('./../data/youtube_channel_list.csv')
+        df = pd.read_csv('./../data/channel/youtube_channel_list.csv')
         df_drop_duplicate = df.drop_duplicates(subset='channel_url')
         pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
         print(self.channel_list_csv_file_path+"重複削除")

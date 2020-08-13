@@ -35,9 +35,9 @@ class ChannelCountryAndScraper(object):
         self.descriptions = []
         self.likes = []
         self.dislikes = []
-        self.channel_list_csv_file_name = "./../data/youtube_search_csv_data"
+        self.channel_list_csv_file_name = "./../data/search/youtube_search_csv_data"
         self.channel_list_csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
-        self.scarch_videos_list_csv_file_name = "./../data/scarch_videos_list_scv"
+        self.scarch_videos_list_csv_file_name = "./../data/search/scarch_videos_list_scv"
         self.scarch_videos_list_csv_file_path = os.path.join(os.getcwd(), self.scarch_videos_list_csv_file_name+'.csv')
 
 

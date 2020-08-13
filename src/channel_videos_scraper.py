@@ -37,12 +37,12 @@ class YoutubeChannelVideoScraper(object):
         dt_now = datetime.datetime.now()
         hour = dt_now.hour
         minute = dt_now.minute
-        self.new_dir_path = os.path.join('./../data/channel_videos/'+str(today)+'-'+str(hour)+':'+str(minute)+'channel_videos')
+        self.new_dir_path = os.path.join('./../data/channel/channel_videos/'+str(today)+'-'+str(hour)+':'+str(minute)+'channel_videos')
         os.mkdir(self.new_dir_path)
 
 
     def read_channel_urls(self):
-        channel_url_data = pd.read_csv('./../data/youtube_channel_list.csv',index_col='channel_url')
+        channel_url_data = pd.read_csv('./../data/channel/youtube_channel_list.csv',index_col='channel_url')
         channel_urls_ndarray = channel_url_data.index.values
         channel_urls = channel_urls_ndarray.tolist()
         for i in channel_urls:
