@@ -431,13 +431,13 @@ class YoutubeChannelOverviewScraper(object):
             Validation
             '''
             if "--" in str(country):
-                country = "非表示"
+                country = '非表示'
             if "<" in str(country):
-                country = "非表示"
+                country = '非表示'
             if "[]" in str(country):
-                country = "非表示"
+                country = '非表示'
             if None is channel_subscriber:
-                channel_subscriber = "非表示"
+                channel_subscriber = '非表示'
             self.channel_countries.append(country)
             self.channel_subscribers.append(channel_subscriber)
 
@@ -471,8 +471,8 @@ class YoutubeChannelOverviewScraper(object):
     def channel_subscriber_set(self):
         # self.channel_subscribers_length = []
         subscribers =  self.channel_subscribers
-        channel_subscriber = str(set(subscribers))
-        self.channel_subscribers_length.append(channel_subscriber)
+        subscriber = str(list(set(subscribers))).replace("[", '').replace("]", '').replace("'", '')
+        self.channel_subscribers_length.append(subscriber)
 
 
     def channel_country_subscriber_add_as_csv_file(self):
@@ -493,8 +493,8 @@ class YoutubeChannelOverviewScraper(object):
 
 
 if __name__ == "__main__":
-    # scraper = YoutubeChannelVideoScraper()
-    # scraper.run()
+    scraper = YoutubeChannelVideoScraper()
+    scraper.run()
     scraper = YoutubeChannelOverviewScraper()
     scraper.run()
 
