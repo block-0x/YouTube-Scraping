@@ -328,11 +328,9 @@ class YoutubeChannelOverviewScraper(object):
 
     def __init__(self):
         self.channel_about_urls = []
-        self.channel_countries = []
-        self.channel_subscribers = []
-        self.alphabet_channel_countries = []
-        self.channel_subscribers_true = []
-        self.nihongo_channel_countries = []
+        self.channel_subscribers_length = []
+        self.channel_length = []
+        # self.nihongo_channel_countries = []
         self.channel_list_csv_file_name = "./../data/channel/youtube_channel_list"
         self.channel_list_csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
 
@@ -363,13 +361,14 @@ class YoutubeChannelOverviewScraper(object):
             params={'url': i, 'wait': 5})
             self.soup = BeautifulSoup(html.text, "html.parser")
             self.parse_channel_country()
-            self.country_length()
+            self.country_set()
             # self.country_nihongo_true()
-            # self.country_alphabet_true()
             self.channel_subscriber_set()
 
 
     def parse_channel_country(self):
+        self.channel_countries = []
+        self.channel_subscribers = []
         soup = self.soup
         '''
         channelSubscriberOfIntExtractionFunction
@@ -380,22 +379,38 @@ class YoutubeChannelOverviewScraper(object):
         if "K" in channel_subscriber_rstrip:
             channel_subscriber_replace = channel_subscriber_rstrip.replace(' ', '')
             if "." in channel_subscriber_rstrip:
-                print(channel_subscriber_rstrip)
                 s = float(str(channel_subscriber_rstrip).rstrip('K subscrib'))
                 s_i, s_d = str(s).split('.')
                 if 1 is len(s_d):
                     channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
-                    channel_subscriber_add_million = str(channel_subscriber_sub) + '000'
+                    channel_subscriber_add_million = str(channel_subscriber_sub) + '00'
                     channel_subscriber_material = int(channel_subscriber_add_million)
                 elif 2 is len(s_d):
                     channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
-                    channel_subscriber_add_million = str(channel_subscriber_sub) + '00'
+                    channel_subscriber_add_million = str(channel_subscriber_sub) + '0'
                     channel_subscriber_material = int(channel_subscriber_add_million)
             else:
                 channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
-                channel_subscriber_add_million = str(channel_subscriber_sub) + '0000'
+                channel_subscriber_add_million = str(channel_subscriber_sub) + '000'
                 channel_subscriber_material = int(channel_subscriber_add_million)
-        elif "<!--css-build:shady-->" in channel_subscriber_rstrip:
+        elif "M" in channel_subscriber_rstrip:
+            channel_subscriber_replace = channel_subscriber_rstrip.replace(' ', '')
+            if "." in channel_subscriber_rstrip:
+                s = float(str(channel_subscriber_rstrip).rstrip('M subscrib'))
+                s_i, s_d = str(s).split('.')
+                if 1 is len(s_d):
+                    channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
+                    channel_subscriber_add_million = str(channel_subscriber_sub) + '00000'
+                    channel_subscriber_material = int(channel_subscriber_add_million)
+                elif 2 is len(s_d):
+                    channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
+                    channel_subscriber_add_million = str(channel_subscriber_sub) + '0000'
+                    channel_subscriber_material = int(channel_subscriber_add_million)
+                else:
+                    channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
+                    channel_subscriber_add_million = str(channel_subscriber_sub) + '000000'
+                    channel_subscriber_material = int(channel_subscriber_add_million)
+        elif "--" in channel_subscriber_rstrip:
             channel_subscriber_material = "非表示"
         else:
             channel_subscriber_replace = channel_subscriber_rstrip.rstrip('K subscrib')
@@ -415,7 +430,7 @@ class YoutubeChannelOverviewScraper(object):
             '''
             Validation
             '''
-            if "--css-build:shady--" in str(country):
+            if "--" in str(country):
                 country = "非表示"
             if "<" in str(country):
                 country = "非表示"
@@ -426,7 +441,9 @@ class YoutubeChannelOverviewScraper(object):
             self.channel_countries.append(country)
             self.channel_subscribers.append(channel_subscriber)
 
-
+    '''
+    scraper JapaneWebScraper
+    '''
     # def country_nihongo_true(self):
     #     country_list = self.channel_countries
     #     country_list_join = ','.join(str(country_list))
@@ -440,39 +457,30 @@ class YoutubeChannelOverviewScraper(object):
     #     self.nihongo_channel_countries.append(str(country))
 
 
-    def country_length(self):
-        self.channel_length = []
+    def country_set(self):
+        # self.channel_length = []
         countries = self.channel_countries
         countries_join = (''.join(countries))
         p = re.compile('[a-zA-Z]+')
         country = ''.join(p.findall(countries_join))
         if None is country:
-            country = 非表示
+            country = '非表示'
         self.channel_length.append(country)
 
 
-    # def country_alphabet_true(self):
-    #     country_list = self.channel_length
-    #     for i in country_list:
-    #         if not None is i:
-    #             country_list_join = ','.join(str(i))
-    #             country_list_join_replace = country_list_join.replace(',', '')
-    #             self.alphabet_channel_countries.append(country_list_join_replace)
-
-
     def channel_subscriber_set(self):
-        subscriber_list =  self.channel_subscribers
-        subscriber = (list(set(subscriber_list)))
-        subscriber = str(subscriber).replace("[", '').replace("]", '')
-        self.channel_subscribers_true.append(subscriber)
+        # self.channel_subscribers_length = []
+        subscribers =  self.channel_subscribers
+        channel_subscriber = set(subscribers)
+        self.channel_subscribers_length.append(channel_subscriber)
 
 
     def channel_country_subscriber_add_as_csv_file(self):
         df = self.df_update
         print(self.channel_length)
-        print(self.channel_subscribers_true)
+        print(self.channel_subscribers_length)
         df['channel_country'] = self.channel_length
-        df['channel_subscriber'] = self.channel_subscribers_true
+        df['channel_subscriber'] = self.channel_subscribers_length
         pd.DataFrame(df).to_csv(self.channel_list_csv_file_path, mode='a', header=False,index=False)
         print(self.channel_list_csv_file_path+"国・登録者追記")
 
