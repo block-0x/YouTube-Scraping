@@ -73,17 +73,17 @@ class YoutubeChannelVideoScraper(object):
 
 
     '''
-    全てのデータを更新する際に使用
+    all data udpate
     '''
-    # def read_channel_urls(self):
-    #     channel_url_data = pd.read_csv(self.channel_list_csv_file_path, index_col='channel_url')
-    #     channel_urls_ndarray = channel_url_data.index.values
-    #     channel_urls = channel_urls_ndarray.tolist()
-    #     for i in channel_urls:
-    #         youtube_url = 'https://www.youtube.com'
-    #         self.channel_url = ('%s' % i)
-    #         channel_videos_url = urlparse.urljoin(youtube_url, self.channel_url+'/videos')
-    #         self.channel_videos_urls.append(channel_videos_url)
+    def read_channel_urls(self):
+        channel_url_data = pd.read_csv(self.channel_list_csv_file_path, index_col='channel_url')
+        channel_urls_ndarray = channel_url_data.index.values
+        channel_urls = channel_urls_ndarray.tolist()
+        for i in channel_urls:
+            youtube_url = 'https://www.youtube.com'
+            self.channel_url = ('%s' % i)
+            channel_videos_url = urlparse.urljoin(youtube_url, self.channel_url+'/videos')
+            self.channel_videos_urls.append(channel_videos_url)
 
 
     def get_page_source(self):
@@ -340,7 +340,7 @@ class YoutubeChannelOverviewScraper(object):
     def run(self):
         self.scrape_at_filter()
         '''
-        全てのデータを更新する際に使用
+        All data update
         '''
         # self.read_channel_urls()
         self.get_page_source()
@@ -363,19 +363,19 @@ class YoutubeChannelOverviewScraper(object):
             print(self.channel_about_urls[-1])
 
     '''
-    全てのデータを更新する際に使用
+    All data update
     '''
-    # def read_channel_urls(self):
-    #     df = pd.read_csv(self.channel_list_csv_file_path)
-    #     self.df_update = df[df['channel_subscriber'].isnull()]
-    #     channel_url_data = self.df_update.set_index('channel_url')
-    #     channel_urls_ndarray = channel_url_data.index.values
-    #     channel_urls = channel_urls_ndarray.tolist()
-    #     for i in channel_urls:
-    #         youtube_url = 'https://www.youtube.com'
-    #         self.channel_url = ('%s' % i)
-    #         channel_about_url = urlparse.urljoin(youtube_url, self.channel_url+'/about')
-    #         self.channel_about_urls.append(channel_about_url)
+    def read_channel_urls(self):
+        df = pd.read_csv(self.channel_list_csv_file_path)
+        self.df_update = df[df['channel_subscriber'].isnull()]
+        channel_url_data = self.df_update.set_index('channel_url')
+        channel_urls_ndarray = channel_url_data.index.values
+        channel_urls = channel_urls_ndarray.tolist()
+        for i in channel_urls:
+            youtube_url = 'https://www.youtube.com'
+            self.channel_url = ('%s' % i)
+            channel_about_url = urlparse.urljoin(youtube_url, self.channel_url+'/about')
+            self.channel_about_urls.append(channel_about_url)
 
 
     def get_page_source(self):
@@ -470,17 +470,17 @@ class YoutubeChannelOverviewScraper(object):
     '''
     scraper JapaneWebScraper
     '''
-    # def country_nihongo_true(self):
-    #     country_list = self.channel_countries
-    #     country_list_join = ','.join(str(country_list))
-    #     country_list_join_replace = country_list_join.replace(',', '')
-    #     nihongo = regex.compile('[\u2E80-\u2FDF\u3005-\u3007\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\U00020000-\U0002EBEF]+')
-    #     country = (nihongo.findall(str(country_list_join_replace)))
-    #     if "[]" in str(country):
-    #         country = '非表示'
-    #     if "[" in str(country):
-    #         country = str(country).replace("['", '').replace("']", '')
-    #     self.nihongo_channel_countries.append(str(country))
+    def country_nihongo_true(self):
+        country_list = self.channel_countries
+        country_list_join = ','.join(str(country_list))
+        country_list_join_replace = country_list_join.replace(',', '')
+        nihongo = regex.compile('[\u2E80-\u2FDF\u3005-\u3007\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\U00020000-\U0002EBEF]+')
+        country = (nihongo.findall(str(country_list_join_replace)))
+        if "[]" in str(country):
+            country = '非表示'
+        if "[" in str(country):
+            country = str(country).replace("['", '').replace("']", '')
+        self.nihongo_channel_countries.append(str(country))
 
 
     def country_set(self):
