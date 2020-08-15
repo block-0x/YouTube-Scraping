@@ -471,7 +471,7 @@ class YoutubeChannelOverviewScraper(object):
     def channel_subscriber_set(self):
         # self.channel_subscribers_length = []
         subscribers =  self.channel_subscribers
-        channel_subscriber = set(subscribers)
+        channel_subscriber = str(set(subscribers))
         self.channel_subscribers_length.append(channel_subscriber)
 
 
