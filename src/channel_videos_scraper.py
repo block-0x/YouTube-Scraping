@@ -9,6 +9,7 @@ from selenium.webdriver.common.keys import Keys
 import re
 import time
 import datetime
+import datetime as dt
 import csv
 try:
     import urlparse
@@ -26,12 +27,21 @@ class YoutubeChannelVideoScraper(object):
 
     def __init__(self):
         self.channel_videos_urls = []
+        self.mean_views_all = []
+        self.channel_list_csv_file_name = "./../data/channel/youtube_channel_list"
+        self.channel_list_csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
 
 
     def run(self):
         self.new_dir()
-        self.read_channel_urls()
+        self.scrape_at_filter()
+        '''
+        全てのデータを更新する際に使用
+        '''
+        # self.read_channel_urls()
         self.get_page_source()
+        self.channel_list_add_as_csv_file()
+        self.csv_file_drop_duplicate()
         self.driver.close()
 
 
@@ -44,15 +54,33 @@ class YoutubeChannelVideoScraper(object):
         os.mkdir(self.new_dir_path)
 
 
-    def read_channel_urls(self):
-        channel_url_data = pd.read_csv('./../data/channel/youtube_channel_list.csv',index_col='channel_url')
+    def scrape_at_filter(self):
+        df = pd.read_csv(self.channel_list_csv_file_path)
+        self.df_scrape_at_this_month = df[df['scrape_at'] > dt.datetime(2020,8,13).strftime("%Y/%m/%d")]
+        channel_url_data = self.df_scrape_at_this_month.set_index('channel_url')
         channel_urls_ndarray = channel_url_data.index.values
         channel_urls = channel_urls_ndarray.tolist()
+        print(channel_urls)
         for i in channel_urls:
             youtube_url = 'https://www.youtube.com'
             self.channel_url = ('%s' % i)
-            channel_videos_url = urlparse.urljoin(youtube_url, self.channel_url+'/videos')
-            self.channel_videos_urls.append(channel_videos_url)
+            channel_video_url = urlparse.urljoin(youtube_url, self.channel_url+'/videos')
+            self.channel_videos_urls.append(channel_video_url)
+            print(self.channel_videos_urls)
+
+
+    '''
+    全てのデータを更新する際に使用
+    '''
+    # def read_channel_urls(self):
+    #     channel_url_data = pd.read_csv(self.channel_list_csv_file_path, index_col='channel_url')
+    #     channel_urls_ndarray = channel_url_data.index.values
+    #     channel_urls = channel_urls_ndarray.tolist()
+    #     for i in channel_urls:
+    #         youtube_url = 'https://www.youtube.com'
+    #         self.channel_url = ('%s' % i)
+    #         channel_videos_url = urlparse.urljoin(youtube_url, self.channel_url+'/videos')
+    #         self.channel_videos_urls.append(channel_videos_url)
 
 
     def get_page_source(self):
@@ -81,6 +109,7 @@ class YoutubeChannelVideoScraper(object):
                     self.new_csv_file()
                     self.save_as_csv_file()
                     self.mean_view_function()
+                    self.mean_views_append()
                     self.mean_comparison_function()
                     self.add_as_csv_file()
                     break
@@ -223,8 +252,8 @@ class YoutubeChannelVideoScraper(object):
             views = self.views
             s = sum(views)
             N = len(views)
-            mean_view_material = s / N
-            self.mean_view = round(mean_view_material)
+            self.mean_view_material = s / N
+            self.mean_view = round(self.mean_view_material)
             for i in views:
                 self.mean_views.append(self.mean_view)
         except ValueError:
@@ -233,23 +262,12 @@ class YoutubeChannelVideoScraper(object):
             print('mean_view_function: TypeError')
 
 
-    def add_mean_view(self):
-        self.mean_views = []
-        if None in self.views:
-            pass
-        df = pd.read_csv(self.new_csv_file_path)
-        try:
-            views = self.views
-            s = sum(views)
-            N = len(views)
-            mean_view_material = s / N
-            self.mean_view = round(mean_view_material)
-            for i in views:
-                self.mean_views.append(self.mean_view)
-        except ValueError:
-            print('mean_view_function: ValueError')
-        except TypeError:
-            print('mean_view_function: TypeError')
+    def mean_views_append(self):
+        mean_views_round = round(self.mean_view_material)
+        print(mean_views_round)
+        mean_views = (str(mean_views_round))
+        print(mean_views)
+        self.mean_views_all.append(mean_views)
 
 
     def mean_comparison_function(self):
@@ -285,6 +303,22 @@ class YoutubeChannelVideoScraper(object):
         except ValueError:
             print('add_as_csv_file: ValueError')
         pd.DataFrame(df).to_csv(self.new_csv_file_path,index=False)
+        print(self.new_csv_file_path+"データ保存")
+
+
+    def  channel_list_add_as_csv_file(self):
+        this_month_filter_df = self.df_scrape_at_this_month
+        print(self.mean_views_all)
+        this_month_filter_df['mean_view'] = self.mean_views_all
+        pd.DataFrame(this_month_filter_df).to_csv(self.channel_list_csv_file_path, mode='a', header=False,index=False)
+        print(self.channel_list_csv_file_path+"追記")
+
+
+    def csv_file_drop_duplicate(self):
+        df = pd.read_csv(self.channel_list_csv_file_path)
+        df_drop_duplicate = df.drop_duplicates(subset='channel_url', keep='last')
+        df_add_csv = pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
+        print(self.channel_list_csv_file_path+"重複動画削除")
 
 
 if __name__ == "__main__":

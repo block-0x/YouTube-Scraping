@@ -174,11 +174,8 @@ class ChannelCountryAndScraper(object):
 
     def add_as_csv_file(self):
         df = pd.read_csv(self.scarch_videos_list_csv_file_path)
-        print(self.views)
         df['view'] = self.views
-        print(self.create_ats)
         df['create_at'] = self.create_ats
-        print(self.tag_str)
         df['tag'] = self.tag_str
         df['description'] = self.descriptions
         df['like'] = self.likes
