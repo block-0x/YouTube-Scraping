@@ -104,10 +104,19 @@ class YoutubeChannelVideoScraper(object):
                 html = self.driver.page_source
                 if self.current_html != html:
                     self.current_html=html
-                    t = 0
-                    start = time.time()
-                    t = time.time() - start
-                    t == 10
+                    # t = 0
+                    # start = time.time()
+                    # t = time.time() - start
+                    # t == 10
+                    # self.parse_videos_title_and_url_and_view()
+                    # self.new_csv_file()
+                    # self.save_as_csv_file()
+                    # self.mean_view_function()
+                    # self.mean_views_append()
+                    # self.mean_comparison_function()
+                    # self.add_as_csv_file()
+                    # break
+                else:
                     self.parse_videos_title_and_url_and_view()
                     self.new_csv_file()
                     self.save_as_csv_file()
@@ -116,14 +125,6 @@ class YoutubeChannelVideoScraper(object):
                     self.mean_comparison_function()
                     self.add_as_csv_file()
                     break
-                # else:
-                    # self.parse_videos_title_and_url_and_view()
-                    # self.new_csv_file()
-                    # self.save_as_csv_file()
-                    # self.mean_view_function()
-                    # self.mean_comparison_function()
-                    # self.add_as_csv_file()
-                #     break
 
 
     def parse_videos_title_and_url_and_view(self):

@@ -8,6 +8,7 @@ from selenium.webdriver.common.keys import Keys
 import re
 import time
 import datetime
+import datetime as dt
 try:
     import urlparse
 except ImportError:
@@ -71,19 +72,19 @@ class YouTubeSearchScraper(object):
                 html = self.driver.page_source
                 if self.current_html != html:
                     self.current_html=html
-                    t = 0
-                    start = time.time()
-                    t = time.time() - start
-                    t == 10
+                    # t = 0
+                    # start = time.time()
+                    # t = time.time() - start
+                    # t == 10
+                    # self.parse_search_videos()
+                    # self.search_data_save_as_csv_file()
+                    # self.channel_list_add_as_csv_file()
+                    # break
+                else:
                     self.parse_search_videos()
                     self.search_data_save_as_csv_file()
                     self.channel_list_add_as_csv_file()
                     break
-                # else:
-                #     self.parse_search_videos()
-                #     self.search_data_save_as_csv_file()
-                #     self.channel_list_add_as_csv_file()
-                #     break
 
 
     def parse_search_videos(self):
@@ -338,6 +339,67 @@ class YouTubeSearchScraper(object):
         print(self.channel_list_csv_file_path+"重複削除")
 
 
+class SearchQuery(object):
+
+    def __init__(self):
+        '''
+        csv_file_path
+        '''
+        self.search_data_csv_file_name = "./../data/search/youtube_search_csv_data"
+        self.channel_list_csv_file_name = "./../data/channel/youtube_channel_list"
+        self.search_csv_data_file_path = os.path.join(os.getcwd(), self.search_data_csv_file_name+'.csv')
+        self.channel_list_csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
+        '''
+        extraction_data
+        '''
+        self.search_urls = []
+        '''
+        scrape_at_stmp
+        '''
+        self.dt_now = datetime.datetime.now()
+        self.dt_year = self.dt_now.year
+        self.dt_month = self.dt_now.month
+        self.dt_day = self.dt_now.day
+
+
+    def run(self):
+        self.read_csv_file()
+        # self.get_page_source()
+
+
+    def read_csv_file(self):
+        channel_list_df = pd.read_csv(self.channel_list_csv_file_path)
+        channel_list_df_channel_url_data = channel_list_df.set_index('channel_url')
+        channel_list_channel_urls_ndarray = channel_list_df_channel_url_data.index.values
+        search_df = pd.read_csv(self.search_csv_data_file_path)
+        self.df_scrape_at_this_today = search_df[search_df['scrape_at'] == dt.datetime(int(self.dt_year),int(self.dt_month),int(self.dt_day)).strftime("%Y/%m/%d")]
+        search_channel_url_data = self.df_scrape_at_this_today.set_index('channel_url')
+        search_channel_urls_ndarray = search_channel_url_data.index.values
+        search_channel_urls = search_channel_urls_ndarray.tolist()
+        for i in search_channel_urls:
+            print(channel_list_channel_urls_ndarray)
+            channel_list_channel_urls_ndarray.str.contains(i)
+            print(channel_list_channel_urls_ndarray)
+        # df = pd.read_csv('./../data/channel/youtube_channel_list.csv')
+        # df_drop_duplicate = df.drop_duplicates(subset='channel_url')
+        # pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
+        # print(self.channel_list_csv_file_path+"重複削除")
+
+
+    def read_search_query(self):
+        search_query_csv = pd.read_csv('./../data/search/search_list.csv',index_col='search_query')
+        search_query_values = search_query_csv.index.values
+        search_queries = search_query_values.tolist()
+        for i in search_queries:
+            youtube_url = 'https://www.youtube.com'
+            self.youtube_search_url = 'results?search_query='
+            self.search_query = ('%s' % i)
+            search_url = urlparse.urljoin(youtube_url, 'results?search_query='+self.search_query)
+            self.search_urls.append(search_url)
+
+
 if __name__ == "__main__":
-    scraper = YouTubeSearchScraper()
-    scraper.run()
+    # scraper = YouTubeSearchScraper()
+    # scraper.run()
+    query = SearchQuery()
+    query.run()
