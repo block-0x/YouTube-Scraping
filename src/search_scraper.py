@@ -373,7 +373,7 @@ class SearchQuery(object):
 
 
     def drop_channel_list_duplicate(self):
-        df = pd.read_csv(self.channel_list_csv_file_name)
+        df = pd.read_csv(self.channel_list_csv_file_path)
         df_drop_duplicate = df.drop_duplicates(subset='channel_url', keep='last')
         pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
         print(self.channel_list_csv_file_path+"重複削除しました")
