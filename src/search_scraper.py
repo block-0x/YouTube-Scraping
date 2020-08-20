@@ -1,5 +1,6 @@
 import os
 from time import sleep
+import pandas
 import pandas as pd
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -336,12 +337,15 @@ class YouTubeSearchScraper(object):
         df = pd.read_csv('./../data/channel/youtube_channel_list.csv')
         df_drop_duplicate = df.drop_duplicates(subset='channel_url')
         pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
-        print(self.channel_list_csv_file_path+"重複削除")
+        print(self.channel_list_csv_file_path+"重複削除しました")
 
 
 class SearchQuery(object):
 
     def __init__(self):
+        self.channel_country = []
+        self.channel_subscriber = []
+        self.mean_views = []
         '''
         csv_file_path
         '''
@@ -363,39 +367,38 @@ class SearchQuery(object):
 
 
     def run(self):
+        self.drop_channel_list_duplicate()
         self.read_csv_file()
-        # self.get_page_source()
+        self.channel_list_csv_scarch_column()
+
+
+    def drop_channel_list_duplicate(self):
+        df = pd.read_csv(self.channel_list_csv_file_name)
+        df_drop_duplicate = df.drop_duplicates(subset='channel_url', keep='last')
+        pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
+        print(self.channel_list_csv_file_path+"重複削除しました")
 
 
     def read_csv_file(self):
-        channel_list_df = pd.read_csv(self.channel_list_csv_file_path)
+        self.channel_list_df = pd.read_csv(self.channel_list_csv_file_path)
         channel_list_df_channel_url_data = channel_list_df.set_index('channel_url')
         channel_list_channel_urls_ndarray = channel_list_df_channel_url_data.index.values
         search_df = pd.read_csv(self.search_csv_data_file_path)
-        self.df_scrape_at_this_today = search_df[search_df['scrape_at'] == dt.datetime(int(self.dt_year),int(self.dt_month),int(self.dt_day)).strftime("%Y/%m/%d")]
-        search_channel_url_data = self.df_scrape_at_this_today.set_index('channel_url')
-        search_channel_urls_ndarray = search_channel_url_data.index.values
-        search_channel_urls = search_channel_urls_ndarray.tolist()
-        for i in search_channel_urls:
-            print(channel_list_channel_urls_ndarray)
-            channel_list_channel_urls_ndarray.str.contains(i)
-            print(channel_list_channel_urls_ndarray)
-        # df = pd.read_csv('./../data/channel/youtube_channel_list.csv')
-        # df_drop_duplicate = df.drop_duplicates(subset='channel_url')
-        # pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
-        # print(self.channel_list_csv_file_path+"重複削除")
+        df_scrape_at_this_today = search_df[search_df['scrape_at'] == dt.datetime(int(self.dt_year),int(self.dt_month),int(self.dt_day)).strftime("%Y/%m/%d")]
+        search_channel_url_data = df_scrape_at_this_today.set_index('channel_url')
+        self.search_channel_urls_ndarray = search_channel_url_data.index.values
 
 
-    def read_search_query(self):
-        search_query_csv = pd.read_csv('./../data/search/search_list.csv',index_col='search_query')
-        search_query_values = search_query_csv.index.values
-        search_queries = search_query_values.tolist()
-        for i in search_queries:
-            youtube_url = 'https://www.youtube.com'
-            self.youtube_search_url = 'results?search_query='
-            self.search_query = ('%s' % i)
-            search_url = urlparse.urljoin(youtube_url, 'results?search_query='+self.search_query)
-            self.search_urls.append(search_url)
+    def channel_list_csv_scarch_column(self):
+        for i in self.search_channel_urls_ndarray:
+            mask = self.channel_list_df['channel_url'] == '%s' % i
+            true_column = self.channel_list_df[mask]
+            channel_country = true_column['channel_country']
+            channel_subscriber = true_column['channel_subscriber']
+            mean_view = true_column['mean_view']
+            self.channel_country.append(channel_country)
+            self.channel_subscriber.append(channel_subscriber)
+            self.mean_views.append(mean_view)
 
 
 if __name__ == "__main__":
