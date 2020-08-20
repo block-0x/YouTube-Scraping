@@ -50,9 +50,9 @@ class YoutubeChannelVideoScraper(object):
 
 
     def drop_channel_list_duplicate(self):
-        df = pd.read_csv(self.channel_list_csv_file_name)
+        df = pd.read_csv(self.channel_list_csv_file_name, engine='python')
         df_drop_duplicate = df.drop_duplicates(subset='channel_url', keep='last')
-        pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
+        pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False, engine='python')
         print(self.channel_list_csv_file_path+"重複削除しました")
 
 
@@ -67,7 +67,7 @@ class YoutubeChannelVideoScraper(object):
 
 
     def scrape_at_filter(self):
-        df = pd.read_csv(self.channel_list_csv_file_path)
+        df = pd.read_csv(self.channel_list_csv_file_path, engine='python')
         self.df_scrape_at_this_month = df[df['scrape_at'] > dt.datetime(2020,8,13).strftime("%Y/%m/%d")]
         channel_url_data = self.df_scrape_at_this_month.set_index('channel_url')
         channel_urls_ndarray = channel_url_data.index.values
@@ -83,7 +83,7 @@ class YoutubeChannelVideoScraper(object):
     all data udpate
     '''
     def read_channel_urls(self):
-        channel_url_data = pd.read_csv(self.channel_list_csv_file_path, index_col='channel_url')
+        channel_url_data = pd.read_csv(self.channel_list_csv_file_path, index_col='channel_url', engine='python')
         channel_urls_ndarray = channel_url_data.index.values
         channel_urls = channel_urls_ndarray.tolist()
         for i in channel_urls:
@@ -251,7 +251,7 @@ class YoutubeChannelVideoScraper(object):
          "channel_subscriber": self.channel_subscribers,
          "create_stamp": self.create_stamps
         }
-        pd.DataFrame(data).to_csv(self.new_csv_file_path,index=False)
+        pd.DataFrame(data).to_csv(self.new_csv_file_path,index=False, engine='python')
         print("新規ファイルに保存しました")
 
 
@@ -259,7 +259,7 @@ class YoutubeChannelVideoScraper(object):
         self.mean_views = []
         if None in self.views:
             pass
-        df = pd.read_csv(self.new_csv_file_path)
+        df = pd.read_csv(self.new_csv_file_path, engine='python')
         try:
             views = self.views
             s = sum(views)
@@ -287,7 +287,7 @@ class YoutubeChannelVideoScraper(object):
         self.mean_comparisons = []
         if None in self.views:
             pass
-        df = pd.read_csv(self.new_csv_file_path)
+        df = pd.read_csv(self.new_csv_file_path, engine='python')
         views = self.views
         mean_view = self.mean_views
         for i in views:
@@ -306,7 +306,7 @@ class YoutubeChannelVideoScraper(object):
     def add_as_csv_file(self):
         if None in self.views:
             pass
-        df = pd.read_csv(self.new_csv_file_path)
+        df = pd.read_csv(self.new_csv_file_path, engine='python')
         try:
             df['mean_view'] = self.mean_views
         except ValueError:
@@ -315,7 +315,7 @@ class YoutubeChannelVideoScraper(object):
             df['mean_comparison'] = self.mean_comparisons
         except ValueError:
             print('add_as_csv_file: ValueError')
-        pd.DataFrame(df).to_csv(self.new_csv_file_path,index=False)
+        pd.DataFrame(df).to_csv(self.new_csv_file_path,index=False, engine='python')
         print(self.new_csv_file_path+"データを保存しました")
 
 
@@ -323,14 +323,14 @@ class YoutubeChannelVideoScraper(object):
         this_month_filter_df = self.df_scrape_at_this_month
         print(self.mean_views_all)
         this_month_filter_df['mean_view'] = self.mean_views_all
-        pd.DataFrame(this_month_filter_df).to_csv(self.channel_list_csv_file_path, mode='a', header=False,index=False)
+        pd.DataFrame(this_month_filter_df).to_csv(self.channel_list_csv_file_path, mode='a', header=False,index=False, engine='python')
         print(self.channel_list_csv_file_path+"追記しました")
 
 
     def csv_file_drop_duplicate(self):
-        df = pd.read_csv(self.channel_list_csv_file_path)
+        df = pd.read_csv(self.channel_list_csv_file_path, engine='python')
         df_drop_duplicate = df.drop_duplicates(subset='channel_url', keep='last')
-        df_add_csv = pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
+        df_add_csv = pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False, engine='python')
         print(self.channel_list_csv_file_path+"重複削除しました")
 
 
@@ -360,7 +360,7 @@ class YoutubeChannelOverviewScraper(object):
 
 
     def scrape_at_filter(self):
-        df = pd.read_csv(self.channel_list_csv_file_path)
+        df = pd.read_csv(self.channel_list_csv_file_path, engine='python')
         self.df_scrape_at_this_month = df[df['scrape_at'] > dt.datetime(2020,8,13).strftime("%Y/%m/%d")]
         channel_url_data = self.df_scrape_at_this_month.set_index('channel_url')
         channel_urls_ndarray = channel_url_data.index.values
@@ -378,7 +378,7 @@ class YoutubeChannelOverviewScraper(object):
     All data update
     '''
     def read_channel_urls(self):
-        df = pd.read_csv(self.channel_list_csv_file_path)
+        df = pd.read_csv(self.channel_list_csv_file_path, engine='python')
         self.df_update = df[df['channel_subscriber'].isnull()]
         channel_url_data = self.df_update.set_index('channel_url')
         channel_urls_ndarray = channel_url_data.index.values
@@ -518,14 +518,14 @@ class YoutubeChannelOverviewScraper(object):
         print(self.channel_subscribers_length)
         df['channel_country'] = self.channel_length
         df['channel_subscriber'] = self.channel_subscribers_length
-        pd.DataFrame(df).to_csv(self.channel_list_csv_file_path, mode='a', header=False,index=False)
+        pd.DataFrame(df).to_csv(self.channel_list_csv_file_path, mode='a', header=False,index=False, engine='python')
         print(self.channel_list_csv_file_path+"国・登録者を更新しました")
 
 
     def csv_file_drop_duplicate(self):
-        df = pd.read_csv(self.channel_list_csv_file_path)
+        df = pd.read_csv(self.channel_list_csv_file_path, engine='python')
         df_drop_duplicate = df[df['channel_subscriber'].notnull()]
-        pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
+        pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False, engine='python')
         print(self.channel_list_csv_file_path+"重複削除しました")
 
 
