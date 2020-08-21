@@ -213,7 +213,11 @@ class YoutubeChannelVideoScraper(object):
             CreatAtOfIntExtractionFunction
             '''
             create_stamp_material = (i.get("aria-label"))
-            create_stamp_findall = (re.findall('%s .*前' % channel_name, create_stamp_material))
+            try:
+                create_stamp_findall = (re.findall('%s .*前' % channel_name, create_stamp_material))
+            except re.error:
+                print("エラー")
+                break
             create_stamp_str = ",".join(create_stamp_findall)
             create_stamp_replace_x = create_stamp_str.replace(channel_name, '')
             create_stamp_replace_x_x = create_stamp_replace_x.replace(' ', '')
@@ -266,8 +270,15 @@ class YoutubeChannelVideoScraper(object):
             views = self.views
             s = sum(views)
             N = len(views)
-            self.mean_view_material = s / N
-            self.mean_view = round(self.mean_view_material)
+            try:
+                self.mean_view_material = s / N
+            except ZeroDivisionError:
+                print("エラー")
+                pass
+            try:
+                self.mean_view = round(self.mean_view_material)
+            except AttributeError:
+                self.mean_view = None
             for i in views:
                 self.mean_views.append(self.mean_view)
         except ValueError:
@@ -277,7 +288,10 @@ class YoutubeChannelVideoScraper(object):
 
 
     def mean_views_append(self):
-        mean_views_round = round(self.mean_view_material)
+        try:
+            mean_views_round = round(self.mean_view_material)
+        except AttributeError:
+            mean_views_round = None
         mean_views = (str(mean_views_round))
         self.mean_views_all.append(mean_views)
 
@@ -328,8 +342,13 @@ class YoutubeChannelVideoScraper(object):
 
 
     def channel_list_csv_add_mean_views(self):
-        print(round(self.mean_view_material))
-        self.true_column['mean_view'] = round(self.mean_view_material)
+        try:
+            print(round(self.mean_view_material))
+            self.true_column['mean_view'] = round(self.mean_view_material)
+        except AttributeError:
+            print("エラー")
+            self.true_column['mean_view'] = None
+            pass
         self.true_column['scrape_at'] = datetime.date.today().strftime("%Y/%m/%d")
         pd.DataFrame(self.true_column).to_csv(self.channel_list_csv_file_path, mode='a', header=False, index=False)
         print(self.channel_list_csv_file_path+"mean_viewsを追記しました")
