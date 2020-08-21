@@ -300,6 +300,8 @@ class YoutubeChannelVideoScraper(object):
                 print('mean_comparison_function: TypeError')
             except ValueError:
                 print('mean_comparison_function: ValueError')
+            except ZeroDivisionError:
+                print('mean_comparison_function: ZeroDivisionError')
 
 
     def add_as_csv_file(self):
