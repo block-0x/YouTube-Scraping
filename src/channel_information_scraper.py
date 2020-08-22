@@ -78,8 +78,9 @@ class YoutubeChannelInformationScraper(object):
     def get_page_source(self):
         for i in self.channel_about_urls:
             html = requests.get('http://localhost:8050/render.html',
-            params={'url': i, 'wait': 5})
+            params={'url': i, 'wait': 4.2})
             self.soup = BeautifulSoup(html.text, "html.parser")
+            self.channel_url = i
             self.parse_channel_country_subscriber()
             self.parse_channel_create_at()
             self.parse_channel_all_video_views()
@@ -92,6 +93,7 @@ class YoutubeChannelInformationScraper(object):
             self.channel_subscriber_set()
             self.channel_list_csv_scarch_column()
             self.country_subscriber_add_as_csv_file()
+            self.drop_channel_list_duplicate()
 
 
     def parse_channel_country_subscriber(self):
@@ -190,6 +192,10 @@ class YoutubeChannelInformationScraper(object):
 
 
     def channel_social_links(self):
+        self.channel_instagram = []
+        self.channel_twitter = []
+        self.channel_blog = []
+        self.channel_blog_set = []
         soup = self.soup.find_all('a', {"class" : "yt-simple-endpoint container style-scope ytd-c4-tabbed-header-renderer"})
         for i in soup:
 	        social_links_i = re.findall('href=".*" title', str(i))
@@ -204,19 +210,16 @@ class YoutubeChannelInformationScraper(object):
 
 
     def parse_channel_instagram(self):
-    	self.channel_instagram = []
     	instagram_link = str(self.social_link).replace("['", '').replace("']", '')
     	self.channel_instagram.append(instagram_link)
 
 
     def parse_channel_twitter(self):
-    	self.channel_twitter = []
     	twitter_link = str(self.social_link).replace("['", '').replace("']", '')
     	self.channel_twitter.append(twitter_link)
 
 
     def parse_channel_blog(self):
-    	self.channel_blog = []
     	blog_link = str(self.social_link).replace("['", '').replace("']", '')
     	self.channel_blog.append(blog_link)
     	self.channel_link_set()
@@ -275,51 +278,41 @@ class YoutubeChannelInformationScraper(object):
             self.true_column['channel_country'] = self.channel_length
         except AttributeError:
             print("エラー")
-            print()
+            print(self.channel_length)
             self.true_column['channel_country'] = "エラー"
-            pass
         try:
         	self.true_column['channel_subscriber'] = self.channel_subscribers_length
         except AttributeError:
         	print("エラー")
-        	print()
+        	print(self.channel_subscribers_length)
         	self.true_column['channel_subscriber'] = "エラー"
-        	pass
         try:
         	self.true_column['channel_create_at'] = self.channel_create_at
         except AttributeError:
         	print("エラー")
-        	print()
+        	print(self.channel_create_at)
         	self.true_column['channel_create_at'] = "エラー"
-        	pass
         try:
         	self.true_column['all_video_views'] = self.channel_all_video_views
         except AttributeError:
         	print("エラー")
-        	print()
+        	print(self.channel_all_video_views)
         	self.true_column['all_video_views'] = "エラー"
-        	pass
         try:
         	self.true_column['instagram'] = self.channel_instagram
-        except AttributeError:
-        	print("エラー")
-        	print()
-        	self.true_column['instagram'] = "非表示"
-        	pass
+        except ValueError:
+        	self.channel_instagram = "非表示"
+        	self.true_column['instagram'] = self.channel_instagram
         try:
         	self.true_column['twitter'] = self.channel_twitter
-        except AttributeError:
-        	print("エラー")
-        	print()
-        	self.true_column['twitter'] = "非表示"
-        	pass
+        except ValueError:
+        	self.channel_twitter = "非表示"
+        	self.true_column['twitter'] = self.channel_twitter
         try:
         	self.true_column['blog'] = self.channel_blog_set
-        except AttributeError:
-        	print("エラー")
-        	print()
-        	self.true_column['blog'] = "非表示"
-        	pass
+        except ValueError:
+        	self.channel_blog_set = "非表示"
+        	self.true_column['blog'] = self.channel_blog_set
         pd.DataFrame(self.true_column).to_csv(self.channel_list_csv_update_file_path, mode='a', header=False, index=False)
         print("国・登録者をcsvに追記しました")
 
