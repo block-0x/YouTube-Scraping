@@ -80,6 +80,7 @@ class YoutubeChannelInformationScraper(object):
             html = requests.get('http://localhost:8050/render.html',
             params={'url': i, 'wait': 4.2})
             self.soup = BeautifulSoup(html.text, "html.parser")
+            print(i)
             self.channel_url = i
             self.parse_channel_country_subscriber()
             self.parse_channel_create_at()
@@ -174,7 +175,7 @@ class YoutubeChannelInformationScraper(object):
         for i in soup:
 	        channel_create_at_i = re.findall('<span class="style-scope yt-formatted-string" dir="auto">.*</span>', str(i))
 	        channel_create_at_str = str(channel_create_at_i).replace('<span class="style-scope yt-formatted-string" dir="auto">', '').replace('</span>', '')
-	        if "," in str(channel_create_at_str):
+	        if "," and "20" in str(channel_create_at_str):
 	        	channel_create_at_str_replace = str(channel_create_at_str).replace(',', '').replace("['", '').replace("']", '')
 		        channel_create_at = datetime.datetime.strptime(str(channel_create_at_str_replace), '%b %d %Y').strftime('%Y/%m/%d')
 		        self.channel_create_at.append(channel_create_at)
