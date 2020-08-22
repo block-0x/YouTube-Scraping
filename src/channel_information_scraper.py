@@ -175,7 +175,7 @@ class YoutubeChannelInformationScraper(object):
         for i in soup:
 	        channel_create_at_i = re.findall('<span class="style-scope yt-formatted-string" dir="auto">.*</span>', str(i))
 	        channel_create_at_str = str(channel_create_at_i).replace('<span class="style-scope yt-formatted-string" dir="auto">', '').replace('</span>', '')
-	        if "," and "20" in str(channel_create_at_str):
+	        if ", 20" in str(channel_create_at_str):
 	        	channel_create_at_str_replace = str(channel_create_at_str).replace(',', '').replace("['", '').replace("']", '')
 		        channel_create_at = datetime.datetime.strptime(str(channel_create_at_str_replace), '%b %d %Y').strftime('%Y/%m/%d')
 		        self.channel_create_at.append(channel_create_at)
