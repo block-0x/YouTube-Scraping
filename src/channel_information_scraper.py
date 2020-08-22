@@ -83,7 +83,7 @@ class YoutubeChannelInformationScraper(object):
             self.parse_channel_country_subscriber()
             self.parse_channel_create_at()
             self.parse_channel_all_video_views()
-            self.parse_channel_instagram()
+            self.channel_social_links()
             self.country_set()
             '''
             scraper JapaneWebScraper
@@ -189,23 +189,44 @@ class YoutubeChannelInformationScraper(object):
 		        self.channel_all_video_views.append(channel_all_video_view)
 
 
+    def channel_social_links(self):
+        soup = self.soup.find_all('a', {"class" : "yt-simple-endpoint container style-scope ytd-c4-tabbed-header-renderer"})
+        for i in soup:
+	        social_links_i = re.findall('href=".*" title', str(i))
+	        if not None in social_links_i:
+	        	self.social_link = str(social_links_i).replace('href="', '').replace('" title', '')
+	        	if "instagram" in self.social_link:
+	        		self.parse_channel_instagram()
+	        	elif "twitter" in self.social_link:
+	        		self.parse_channel_twitter()
+	        	else:
+	        		self.parse_channel_blog()
+
+
     def parse_channel_instagram(self):
-        self.channel_countries = []
-        self.channel_subscribers = []
-        soup = self.soup
-        print(soup)
+    	self.channel_instagram = []
+    	instagram_link = str(self.social_link).replace("['", '').replace("']", '')
+    	self.channel_instagram.append(instagram_link)
 
 
     def parse_channel_twitter(self):
-        self.channel_countries = []
-        self.channel_subscribers = []
-        soup = self.soup
+    	self.channel_twitter = []
+    	twitter_link = str(self.social_link).replace("['", '').replace("']", '')
+    	self.channel_twitter.append(twitter_link)
 
 
     def parse_channel_blog(self):
-        self.channel_countries = []
-        self.channel_subscribers = []
-        soup = self.soup
+    	self.channel_blog = []
+    	blog_link = str(self.social_link).replace("['", '').replace("']", '')
+    	self.channel_blog.append(blog_link)
+    	self.channel_link_set()
+
+
+    def channel_link_set(self):
+        self.channel_blog_set = []
+        channel_blog_links = self.channel_blog
+        channel_blog_link = ''.join(channel_blog_links)
+        self.channel_blog_set.append(channel_blog_link)
 
 
     '''
@@ -277,6 +298,27 @@ class YoutubeChannelInformationScraper(object):
         	print("エラー")
         	print()
         	self.true_column['all_video_views'] = "エラー"
+        	pass
+        try:
+        	self.true_column['instagram'] = self.channel_instagram
+        except AttributeError:
+        	print("エラー")
+        	print()
+        	self.true_column['instagram'] = "非表示"
+        	pass
+        try:
+        	self.true_column['twitter'] = self.channel_twitter
+        except AttributeError:
+        	print("エラー")
+        	print()
+        	self.true_column['twitter'] = "非表示"
+        	pass
+        try:
+        	self.true_column['blog'] = self.channel_blog_set
+        except AttributeError:
+        	print("エラー")
+        	print()
+        	self.true_column['blog'] = "非表示"
         	pass
         pd.DataFrame(self.true_column).to_csv(self.channel_list_csv_update_file_path, mode='a', header=False, index=False)
         print("国・登録者をcsvに追記しました")
