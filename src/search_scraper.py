@@ -381,7 +381,7 @@ class SearchQuery(object):
 
     def read_csv_file(self):
         self.channel_list_df = pd.read_csv(self.channel_list_csv_file_path)
-        channel_list_df_channel_url_data = channel_list_df.set_index('channel_url')
+        channel_list_df_channel_url_data = self.channel_list_df.set_index('channel_url')
         channel_list_channel_urls_ndarray = channel_list_df_channel_url_data.index.values
         search_df = pd.read_csv(self.search_csv_data_file_path)
         df_scrape_at_this_today = search_df[search_df['scrape_at'] == dt.datetime(int(self.dt_year),int(self.dt_month),int(self.dt_day)).strftime("%Y/%m/%d")]
@@ -402,7 +402,7 @@ class SearchQuery(object):
 
 
 if __name__ == "__main__":
-    # scraper = YouTubeSearchScraper()
-    # scraper.run()
-    query = SearchQuery()
-    query.run()
+    scraper = YouTubeSearchScraper()
+    scraper.run()
+    # query = SearchQuery()
+    # query.run()

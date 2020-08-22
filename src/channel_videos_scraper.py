@@ -400,7 +400,6 @@ class YoutubeChannelOverviewScraper(object):
         channel_url_data = self.df_scrape_at_this_month.set_index('channel_url')
         channel_urls_ndarray = channel_url_data.index.values
         channel_urls = channel_urls_ndarray.tolist()
-        print(channel_urls)
         for i in channel_urls:
             youtube_url = 'https://www.youtube.com'
             self.channel_url = ('%s' % i)
@@ -488,10 +487,10 @@ class YoutubeChannelOverviewScraper(object):
         else:
             channel_subscriber_replace = channel_subscriber_rstrip.rstrip('K subscrib')
             channel_subscriber_sub = re.sub("\\D", "", str(channel_subscriber_replace))
-            channel_subscriber_material = int(channel_subscriber_sub)
-            '''
-            countryOfIntExtractionFunction
-            '''
+            try:
+                channel_subscriber_material = int(channel_subscriber_sub)
+            except ValueError:
+                channel_subscriber_material = "非表示"
         for i in soup.find_all("td", class_="style-scope ytd-channel-about-metadata-renderer"):
             country_i_findall = re.findall('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">.*</yt-formatted-string>', str(i))
             country_i_replace = str(country_i_findall).replace('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer">', '').replace('</yt-formatted-string>', '')
@@ -547,6 +546,13 @@ class YoutubeChannelOverviewScraper(object):
         self.channel_subscribers_length.append(subscriber)
 
 
+    def channel_list_csv_scarch_column(self):
+        channel_url_i = self.channel_about_urls
+        channel_url = channel_url_i.replace('https://www.youtube.com', '').replace('/about', '')
+        mask = self.df['channel_url'] == '%s' % channel_url
+        self.true_column = self.df[mask]
+
+
     def channel_country_subscriber_add_as_csv_file(self):
         df = self.df_scrape_at_this_month
         print(self.channel_length)
@@ -558,8 +564,8 @@ class YoutubeChannelOverviewScraper(object):
 
 
 if __name__ == "__main__":
-    scraper = YoutubeChannelVideoScraper()
-    scraper.run()
+    # scraper = YoutubeChannelVideoScraper()
+    # scraper.run()
     scraper = YoutubeChannelOverviewScraper()
     scraper.run()
 
