@@ -33,10 +33,14 @@ class YoutubeChannelVideoScraper(object):
         self.mean_views_all = []
         self.channel_list_csv_file_name = "./../data/channel/youtube_channel_list"
         self.channel_list_csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
+        self.channel_list_update_csv_file_name = "./../data/channel/youtube_channel_list_update"
+        self.channel_list_csv_update_file_path = os.path.join(os.getcwd(), self.channel_list_update_csv_file_name+'.csv')
 
 
     def run(self):
-        self.drop_channel_list_duplicate()
+        self.channel_list_csv_drop_duplicate()
+        self.csv_copy()
+        self.channel_list_update_csv_drop_duplicate()
         self.new_dir()
         self.scrape_at_filter()
         '''
@@ -49,11 +53,22 @@ class YoutubeChannelVideoScraper(object):
         self.driver.close()
 
 
-    def drop_channel_list_duplicate(self):
-        df = pd.read_csv(self.channel_list_csv_file_path, engine='python')
-        df_drop_duplicate = df.drop_duplicates(subset='channel_url', keep='last')
-        pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
-        print(self.channel_list_csv_file_path+"重複削除しました")
+    def channel_list_csv_drop_duplicate(self):
+        channel_list_df = pd.read_csv(self.channel_list_csv_file_path, engine='python')
+        self.channel_list_df_drop_duplicate = channel_list_df.drop_duplicates(subset='channel_url', keep='first')
+        print("重複削除したデータをしました")
+
+
+    def csv_copy(self):
+        channel_list_df_drop_duplicate = self.channel_list_df_drop_duplicate
+        pd.DataFrame(channel_list_df_drop_duplicate).to_csv(self.channel_list_csv_update_file_path, mode='a', header=False, index=False)
+        print("追加コピーしました")
+
+
+    def channel_list_update_csv_drop_duplicate(self):
+        channel_list_update_df = pd.read_csv(self.channel_list_csv_update_file_path, engine='python')
+        self.channel_list_update_df_drop_duplicate = channel_list_update_df.drop_duplicates(subset='channel_url', keep='first')
+        print("追加コピーしたデータの重複を削除しました")
 
 
     def new_dir(self):
@@ -68,7 +83,7 @@ class YoutubeChannelVideoScraper(object):
 
     def scrape_at_filter(self):
         self.df = pd.read_csv(self.channel_list_csv_file_path, engine='python')
-        self.df_scrape_at_this_month = self.df[self.df['scrape_at'] > dt.datetime(2020,8,13).strftime("%Y/%m/%d")]
+        self.df_scrape_at_this_month = self.df[self.df['scrape_at'] == dt.datetime(2020,8,21).strftime("%Y/%m/%d")]
         channel_url_data = self.df_scrape_at_this_month.set_index('channel_url')
         channel_urls_ndarray = channel_url_data.index.values
         channel_urls = channel_urls_ndarray.tolist()
@@ -357,7 +372,7 @@ class YoutubeChannelVideoScraper(object):
     def csv_file_drop_duplicate(self):
         df = pd.read_csv(self.channel_list_csv_file_path, engine='python')
         df_drop_duplicate = df.drop_duplicates(subset='channel_url', keep='last')
-        df_add_csv = pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
+        df_add_csv = pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path, index=False)
         print(self.channel_list_csv_file_path+"重複削除しました")
 
 

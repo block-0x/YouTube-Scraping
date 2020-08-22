@@ -35,8 +35,8 @@ class ChannelCountryAndScraper(object):
         self.descriptions = []
         self.likes = []
         self.dislikes = []
-        self.channel_list_csv_file_name = "./../data/search/youtube_search_csv_data"
-        self.channel_list_csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
+        self.search_data_csv_file_name = "./../data/search/youtube_search_csv_data"
+        self.search_data_csv_file_path = os.path.join(os.getcwd(), self.search_data_csv_file_name+'.csv')
         self.scarch_videos_list_csv_file_name = "./../data/search/scarch_videos_list_scv"
         self.scarch_videos_list_csv_file_path = os.path.join(os.getcwd(), self.scarch_videos_list_csv_file_name+'.csv')
 
@@ -51,7 +51,7 @@ class ChannelCountryAndScraper(object):
 
 
     def copy_csv(self):
-        df = pd.read_csv(self.channel_list_csv_file_path)
+        df = pd.read_csv(self.search_data_csv_file_path)
         pd.DataFrame(df).to_csv(self.scarch_videos_list_csv_file_path,index=False)
         print(self.scarch_videos_list_csv_file_path+"にコピーしました")
 

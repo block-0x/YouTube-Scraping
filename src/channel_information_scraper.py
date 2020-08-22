@@ -43,7 +43,7 @@ class YoutubeChannelInformationScraper(object):
         df = pd.read_csv(self.channel_list_csv_update_file_path, engine='python')
         df_drop_duplicate = df.drop_duplicates(subset='channel_url', keep='last')
         pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_update_file_path,index=False)
-        print("重複削除しました")
+        print(channel_list_csv_update_file_path+"の重複削除しました")
 
 
     def scrape_at_filter(self):
@@ -278,27 +278,36 @@ class YoutubeChannelInformationScraper(object):
         try:
             self.true_column['channel_country'] = self.channel_length
         except AttributeError:
-            print("エラー")
+            print(self.channel_length)
+            self.true_column['channel_country'] = "エラー"
+        except ValueError:
             print(self.channel_length)
             self.true_column['channel_country'] = "エラー"
         try:
         	self.true_column['channel_subscriber'] = self.channel_subscribers_length
         except AttributeError:
-        	print("エラー")
         	print(self.channel_subscribers_length)
         	self.true_column['channel_subscriber'] = "エラー"
+        except ValueError:
+            print(self.channel_length)
+            self.true_column['channel_subscriber'] = "エラー"
         try:
         	self.true_column['channel_create_at'] = self.channel_create_at
         except AttributeError:
-        	print("エラー")
         	print(self.channel_create_at)
         	self.true_column['channel_create_at'] = "エラー"
+        except ValueError:
+            print(self.channel_create_at)
+            self.true_column['channel_create_at'] = "エラー"
         try:
         	self.true_column['all_video_views'] = self.channel_all_video_views
         except AttributeError:
         	print("エラー")
         	print(self.channel_all_video_views)
         	self.true_column['all_video_views'] = "エラー"
+        except ValueError:
+            print(self.channel_length)
+            self.true_column['all_video_views'] = "エラー"
         try:
         	self.true_column['instagram'] = self.channel_instagram
         except ValueError:
@@ -315,7 +324,7 @@ class YoutubeChannelInformationScraper(object):
         	self.channel_blog_set = "非表示"
         	self.true_column['blog'] = self.channel_blog_set
         pd.DataFrame(self.true_column).to_csv(self.channel_list_csv_update_file_path, mode='a', header=False, index=False)
-        print("国・登録者をcsvに追記しました")
+        print(channel_list_csv_update_file_path+"に追記しました")
 
 
 if __name__ == "__main__":
