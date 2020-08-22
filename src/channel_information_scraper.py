@@ -1,11 +1,27 @@
+from bs4 import BeautifulSoup
+import datetime
+import datetime as dt
+import json
+import os.path
+import pandas as pd
+import re
+import regex
+import requests
+from time import sleep
+import numpy as np
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
+import urllib.request, urllib.error
+
+
 class YoutubeChannelInformationScraper(object):
 
     def __init__(self):
         self.channel_about_urls = []
-        self.channel_subscribers_length = []
-        self.channel_length = []
-        self.channel_list_csv_file_name = "./../data/channel/youtube_channel_list"
-        self.channel_list_csv_file_path = os.path.join(os.getcwd(), self.channel_list_csv_file_name+'.csv')
+        self.channel_list_update_csv_file_name = "./../data/channel/youtube_channel_list_update"
+        self.channel_list_csv_update_file_path = os.path.join(os.getcwd(), self.channel_list_update_csv_file_name+'.csv')
         '''
         scraper JapaneWebScraper
         '''
@@ -20,20 +36,19 @@ class YoutubeChannelInformationScraper(object):
         '''
         # self.read_channel_urls()
         self.get_page_source()
-        self.channel_country_subscriber_add_as_csv_file()
         self.drop_channel_list_duplicate()
 
 
     def drop_channel_list_duplicate(self):
-        df = pd.read_csv(self.channel_list_csv_file_path, engine='python')
+        df = pd.read_csv(self.channel_list_csv_update_file_path, engine='python')
         df_drop_duplicate = df.drop_duplicates(subset='channel_url', keep='last')
-        pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_file_path,index=False)
-        print(self.channel_list_csv_file_path+"重複削除しました")
+        pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_update_file_path,index=False)
+        print("重複削除しました")
 
 
     def scrape_at_filter(self):
-        df = pd.read_csv(self.channel_list_csv_file_path, engine='python')
-        self.df_scrape_at_this_month = df[df['scrape_at'] > dt.datetime(2020,8,13).strftime("%Y/%m/%d")]
+        self.df = pd.read_csv(self.channel_list_csv_update_file_path, engine='python')
+        self.df_scrape_at_this_month = self.df[self.df['scrape_at'] > dt.datetime(2020,8,19).strftime("%Y/%m/%d")]
         channel_url_data = self.df_scrape_at_this_month.set_index('channel_url')
         channel_urls_ndarray = channel_url_data.index.values
         channel_urls = channel_urls_ndarray.tolist()
@@ -42,14 +57,13 @@ class YoutubeChannelInformationScraper(object):
             self.channel_url = ('%s' % i)
             channel_about_url = urlparse.urljoin(youtube_url, self.channel_url+'/about')
             self.channel_about_urls.append(channel_about_url)
-            print(self.channel_about_urls[-1])
 
 
     '''
     All data update
     '''
     def read_channel_urls(self):
-        df = pd.read_csv(self.channel_list_csv_file_path, engine='python')
+        df = pd.read_csv(self.channel_list_csv_update_file_path, engine='python')
         self.df_update = df[df['channel_subscriber'].isnull()]
         channel_url_data = self.df_update.set_index('channel_url')
         channel_urls_ndarray = channel_url_data.index.values
@@ -66,16 +80,21 @@ class YoutubeChannelInformationScraper(object):
             html = requests.get('http://localhost:8050/render.html',
             params={'url': i, 'wait': 5})
             self.soup = BeautifulSoup(html.text, "html.parser")
-            self.parse_channel_country()
+            self.parse_channel_country_subscriber()
+            self.parse_channel_create_at()
+            self.parse_channel_all_video_views()
+            self.parse_channel_instagram()
             self.country_set()
             '''
             scraper JapaneWebScraper
             '''
             # self.country_nihongo_true()
             self.channel_subscriber_set()
+            self.channel_list_csv_scarch_column()
+            self.country_subscriber_add_as_csv_file()
 
 
-    def parse_channel_country(self):
+    def parse_channel_country_subscriber(self):
         self.channel_countries = []
         self.channel_subscribers = []
         soup = self.soup
@@ -139,16 +158,54 @@ class YoutubeChannelInformationScraper(object):
             '''
             Validation
             '''
-            if "--" in str(country):
-                country = '非表示'
-            if "<" in str(country):
-                country = '非表示'
-            if "[]" in str(country):
+            if "--" or "<" or "[]" in str(country):
                 country = '非表示'
             if None is channel_subscriber:
                 channel_subscriber = '非表示'
             self.channel_countries.append(country)
             self.channel_subscribers.append(channel_subscriber)
+
+
+    def parse_channel_create_at(self):
+        self.channel_create_at = []
+        soup = self.soup.find_all('span', {"class" : "style-scope yt-formatted-string"})
+        for i in soup:
+	        channel_create_at_i = re.findall('<span class="style-scope yt-formatted-string" dir="auto">.*</span>', str(i))
+	        channel_create_at_str = str(channel_create_at_i).replace('<span class="style-scope yt-formatted-string" dir="auto">', '').replace('</span>', '')
+	        if "," in str(channel_create_at_str):
+	        	channel_create_at_str_replace = str(channel_create_at_str).replace(',', '').replace("['", '').replace("']", '')
+		        channel_create_at = datetime.datetime.strptime(str(channel_create_at_str_replace), '%b %d %Y').strftime('%Y/%m/%d')
+		        self.channel_create_at.append(channel_create_at)
+
+
+    def parse_channel_all_video_views(self):
+        self.channel_all_video_views = []
+        soup = self.soup.find_all('yt-formatted-string', {"class" : "style-scope ytd-channel-about-metadata-renderer"})
+        for i in soup:
+	        channel_all_video_views_i = re.findall('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer" no-styles="">.*</yt-formatted-string>', str(i))
+	        channel_all_video_views_str = str(channel_all_video_views_i).replace('<yt-formatted-string class="style-scope ytd-channel-about-metadata-renderer" no-styles="">', '').replace('</yt-formatted-string>', '')
+	        if "views" in str(channel_all_video_views_str):
+	        	channel_all_video_view = re.sub("\\D", "", str(channel_all_video_views_str))
+		        self.channel_all_video_views.append(channel_all_video_view)
+
+
+    def parse_channel_instagram(self):
+        self.channel_countries = []
+        self.channel_subscribers = []
+        soup = self.soup
+        print(soup)
+
+
+    def parse_channel_twitter(self):
+        self.channel_countries = []
+        self.channel_subscribers = []
+        soup = self.soup
+
+
+    def parse_channel_blog(self):
+        self.channel_countries = []
+        self.channel_subscribers = []
+        soup = self.soup
 
 
     '''
@@ -168,6 +225,7 @@ class YoutubeChannelInformationScraper(object):
 
 
     def country_set(self):
+        self.channel_length = []
         countries = self.channel_countries
         countries_join = (''.join(countries))
         p = re.compile('[a-zA-Z]+')
@@ -178,26 +236,51 @@ class YoutubeChannelInformationScraper(object):
 
 
     def channel_subscriber_set(self):
+        self.channel_subscribers_length = []
         subscribers =  self.channel_subscribers
         subscriber = str(list(set(subscribers))).replace("[", '').replace("]", '').replace("'", '')
         self.channel_subscribers_length.append(subscriber)
 
 
     def channel_list_csv_scarch_column(self):
-        channel_url_i = self.channel_about_urls
+        channel_url_i = self.channel_url
         channel_url = channel_url_i.replace('https://www.youtube.com', '').replace('/about', '')
         mask = self.df['channel_url'] == '%s' % channel_url
         self.true_column = self.df[mask]
 
 
-    def channel_country_subscriber_add_as_csv_file(self):
-        df = self.df_scrape_at_this_month
-        print(self.channel_length)
-        print(self.channel_subscribers_length)
-        df['channel_country'] = self.channel_length
-        df['channel_subscriber'] = self.channel_subscribers_length
-        pd.DataFrame(df).to_csv(self.channel_list_csv_file_path, mode='a', header=False, index=False)
-        print(self.channel_list_csv_file_path+"国・登録者を更新しました")
+    def country_subscriber_add_as_csv_file(self):
+        try:
+            self.true_column['channel_country'] = self.channel_length
+        except AttributeError:
+            print("エラー")
+            print()
+            self.true_column['channel_country'] = "エラー"
+            pass
+        try:
+        	self.true_column['channel_subscriber'] = self.channel_subscribers_length
+        except AttributeError:
+        	print("エラー")
+        	print()
+        	self.true_column['channel_subscriber'] = "エラー"
+        	pass
+        try:
+        	self.true_column['channel_create_at'] = self.channel_create_at
+        except AttributeError:
+        	print("エラー")
+        	print()
+        	self.true_column['channel_create_at'] = "エラー"
+        	pass
+        try:
+        	self.true_column['all_video_views'] = self.channel_all_video_views
+        except AttributeError:
+        	print("エラー")
+        	print()
+        	self.true_column['all_video_views'] = "エラー"
+        	pass
+        pd.DataFrame(self.true_column).to_csv(self.channel_list_csv_update_file_path, mode='a', header=False, index=False)
+        print("国・登録者をcsvに追記しました")
+
 
 if __name__ == "__main__":
 	scraper = YoutubeChannelInformationScraper()
