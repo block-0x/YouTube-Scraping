@@ -43,7 +43,7 @@ class YoutubeChannelInformationScraper(object):
         df = pd.read_csv(self.channel_list_csv_update_file_path, engine='python')
         df_drop_duplicate = df.drop_duplicates(subset='channel_url', keep='last')
         pd.DataFrame(df_drop_duplicate).to_csv(self.channel_list_csv_update_file_path,index=False)
-        print(channel_list_csv_update_file_path+"の重複削除しました")
+        print(self.channel_list_csv_update_file_path+"の重複削除しました")
 
 
     def scrape_at_filter(self):
@@ -157,7 +157,10 @@ class YoutubeChannelInformationScraper(object):
             '''
             channelSubscriberOfIntExtractionFunction
             '''
-            channel_subscriber = channel_subscriber_material
+            try:
+                channel_subscriber = channel_subscriber_material
+            except UnboundLocalError:
+                channel_subscriber = "非表示"
             '''
             Validation
             '''
@@ -324,7 +327,7 @@ class YoutubeChannelInformationScraper(object):
         	self.channel_blog_set = "非表示"
         	self.true_column['blog'] = self.channel_blog_set
         pd.DataFrame(self.true_column).to_csv(self.channel_list_csv_update_file_path, mode='a', header=False, index=False)
-        print(channel_list_csv_update_file_path+"に追記しました")
+        print(self.channel_list_csv_update_file_path+"に追記しました")
 
 
 if __name__ == "__main__":
