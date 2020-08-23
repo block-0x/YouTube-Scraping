@@ -164,8 +164,13 @@ class YoutubeChannelInformationScraper(object):
             '''
             Validation
             '''
-            if "--" or "<" or "[]" in str(country):
+            if '--' in str(country):
                 country = '非表示'
+            if "<" in str(country):
+                country = '非表示'
+            if "[]" in str(country):
+                country = '非表示'
+            print(str(country))
             if None is channel_subscriber:
                 channel_subscriber = '非表示'
             self.channel_countries.append(country)
@@ -278,6 +283,7 @@ class YoutubeChannelInformationScraper(object):
 
 
     def country_subscriber_add_as_csv_file(self):
+        print(self.channel_length)
         try:
             self.true_column['channel_country'] = self.channel_length
         except AttributeError:
